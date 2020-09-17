@@ -11,8 +11,10 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         Parent p = FXMLLoader.load(getClass().getResource("main.fxml"));
         primaryStage.setTitle("Анализатор статистик");
-        primaryStage.setScene(new Scene(p, 700, 600));
+        Scene scene = new Scene(p, 700, 600);
+        primaryStage.setScene(scene);
         primaryStage.getIcons().add(new Image("/icon.png"));
+
         primaryStage.show();
     }
 

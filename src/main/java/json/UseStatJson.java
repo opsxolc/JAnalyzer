@@ -2,8 +2,6 @@ package json;
 
 import com.google.gson.Gson;
 
-import java.util.function.Function;
-
 public class UseStatJson {
     private static Gson gson = new Gson();
 

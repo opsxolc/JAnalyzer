@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" style="-fx-background-color: linear-gradient(to right, transparent, #ff7f50, #6a5acd)linear-gradient(to right, transparent, #ff7f50, #6a5acd);" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="StatTreeItemController">
+   <children>
+      <Label layoutX="14.0" layoutY="6.0" text="Время вып.          ➣" AnchorPane.bottomAnchor="26.0" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="6.0" />
+      <Label layoutX="14.0" layoutY="26.0" text="Коэф. эффект.   ➣" AnchorPane.bottomAnchor="6.0" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="26.0" />
+      <Label fx:id="execLabel" layoutX="124.0" layoutY="6.0" text="6" AnchorPane.bottomAnchor="26.0" AnchorPane.leftAnchor="124.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="6.0" />
+      <Label fx:id="coefLabel" layoutX="124.0" layoutY="26.0" text="5" AnchorPane.bottomAnchor="6.0" AnchorPane.leftAnchor="124.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="26.0" />
+   </children>
+</AnchorPane>
