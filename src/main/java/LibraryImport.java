@@ -2,9 +2,9 @@ public class LibraryImport {
 
     public static native String readStat(String s);
 
-    public static void main(String[] args) {
-        System.out.println(LibraryImport.readStat("hello"));
-    }
+//    public static void main(String[] args) {
+//        System.out.println(LibraryImport.readStat("hello"));
+//    }
 
     static {
 //        nativeLibPath += "/HelloJNI.dll"; //HelloJNI.so or HelloJNI.jnilib for UNIX
