@@ -5,9 +5,12 @@
 <?import javafx.scene.chart.StackedBarChart?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TreeView?>
@@ -18,32 +21,46 @@
 <!---->
 <!--</GridPane>-->
 
-<TabPane fx:id="tabPane" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
+<TabPane fx:id="tabPane" prefHeight="515.0" prefWidth="655.0" stylesheets="@bootstrap3.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
 <tabs>
     <Tab fx:id="loadStatsTab" closable="false" text="Загрузка статистик">
         <AnchorPane>
-            <Label fx:id="label1" layoutX="14.0" layoutY="46.0" text="Label" AnchorPane.leftAnchor="14.0" />
-            <TextField fx:id="loadPath" layoutX="14.0" layoutY="7.0" prefHeight="27.0" prefWidth="480.0" promptText="Enter full path to sts.gz+ file" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="106.0" AnchorPane.topAnchor="9.0" />
-            <Button fx:id="loadStatButton" layoutX="505.0" layoutY="7.0" onAction="#LoadStat" text="Сохранить" AnchorPane.rightAnchor="14.5" AnchorPane.topAnchor="9.0" />
+            <Label fx:id="label1" layoutX="552.0" layoutY="45.0" text="Label" AnchorPane.rightAnchor="73.0" AnchorPane.topAnchor="45.0" />
+            <TextField fx:id="loadPath" layoutX="14.0" layoutY="7.0" prefHeight="27.0" prefWidth="529.0" promptText="Enter full path to sts.gz+ file" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="112.0" AnchorPane.topAnchor="9.0" />
+            <Button fx:id="loadStatButton" layoutX="505.0" layoutY="7.0" onAction="#LoadStat" text="Сохранить" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="9.0" />
+            <TableView fx:id="statTableView" layoutX="14.0" layoutY="50.0" prefHeight="402.0" prefWidth="529.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="112.0" AnchorPane.topAnchor="45.0">
+              <columns>
+                <TableColumn prefWidth="191.0" text="Статистика выполнения" />
+                <TableColumn minWidth="0.0" prefWidth="287.0" text="Дата загрузки" />
+              </columns>
+            </TableView>
         </AnchorPane>
     </Tab>
     <Tab fx:id="showStatTab" closable="false" text="Единичная статистика">
-        <AnchorPane>
-            <SplitPane fx:id="statSplitPane" dividerPositions="0.29780564263322884, 0.6520376175548589" layoutY="44.0" prefHeight="356.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="44.0">
+        <AnchorPane prefHeight="436.0" prefWidth="655.0">
+            <SplitPane fx:id="statSplitPane" dividerPositions="0.5926493108728943, 0.9938744257274119" layoutY="47.0" prefHeight="414.0" prefWidth="655.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="47.0">
                 <items>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                         <children>
-                            <StackedBarChart fx:id="statChart" layoutX="-2.0" layoutY="-8.0" prefHeight="345.0" prefWidth="260.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                <xAxis>
-                                    <CategoryAxis side="BOTTOM" />
-                                </xAxis>
-                                <yAxis>
-                                    <NumberAxis side="LEFT" />
-                                </yAxis>
-                            </StackedBarChart>
+                        <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="ALWAYS" vbarPolicy="ALWAYS" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <content>
+                              <AnchorPane>
+                                 <children>
+                                        <StackedBarChart fx:id="statChart" alternativeRowFillVisible="false" animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" stylesheets="@series.css" title="Потерянное время" verticalGridLinesVisible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                            <xAxis>
+                                                <CategoryAxis label="Процессоры" side="BOTTOM" />
+                                            </xAxis>
+                                            <yAxis>
+                                                <NumberAxis label="Время, с" side="LEFT" />
+                                            </yAxis>
+                                        </StackedBarChart>
+                                 </children>
+                              </AnchorPane>
+                           </content>
+                        </ScrollPane>
                         </children>
                     </AnchorPane>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="208.0">
                         <children>
                             <TreeView fx:id="statTreeView" prefHeight="371.0" prefWidth="232.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                         </children>
@@ -55,10 +72,10 @@
                     </AnchorPane>
                 </items>
             </SplitPane>
-            <Label fx:id="statLabel" layoutX="14.0" layoutY="14.0" prefHeight="17.0" prefWidth="385.0" text="Label" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="201.0" AnchorPane.topAnchor="14.0" />
-            <Button fx:id="resetStatButton" layoutX="409.0" layoutY="8.0" mnemonicParsing="false" prefHeight="3.0" prefWidth="56.0" text="Сброс" AnchorPane.rightAnchor="135.0" AnchorPane.topAnchor="9.0" />
+            <Label fx:id="statLabel" layoutX="14.0" layoutY="14.0" prefHeight="17.0" prefWidth="410.0" text="Label" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="231.0" AnchorPane.topAnchor="14.0" />
+            <Button fx:id="resetStatButton" layoutX="433.0" layoutY="9.0" mnemonicParsing="false" prefHeight="18.0" prefWidth="79.0" text="Сброс" AnchorPane.rightAnchor="143.0" AnchorPane.topAnchor="9.0" />
             <Button layoutX="516.0" layoutY="9.0" mnemonicParsing="false" text="Button" AnchorPane.rightAnchor="14.5" AnchorPane.topAnchor="9.0" />
-            <Button layoutX="516.0" layoutY="8.0" mnemonicParsing="false" text="Button" AnchorPane.rightAnchor="69.5" AnchorPane.topAnchor="9.0" />
+            <Button layoutX="517.0" layoutY="9.0" mnemonicParsing="false" text="Button" AnchorPane.rightAnchor="76.5" AnchorPane.topAnchor="9.0" />
         </AnchorPane>
     </Tab>
     <Tab fx:id="compareStatsTab" closable="false" text="Сравнение статистик">

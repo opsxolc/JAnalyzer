@@ -14,7 +14,7 @@ public class Main extends Application {
         Scene scene = new Scene(p, 700, 600);
         primaryStage.setScene(scene);
         primaryStage.getIcons().add(new Image("/icon.png"));
-
+        primaryStage.getScene().getStylesheets().add("series.css");
         primaryStage.show();
     }
 

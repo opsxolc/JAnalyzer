@@ -61,9 +61,18 @@ public class Interval {
         }
     }
 
-    public String getGradient(){
-        String result = "-fx-background-color: linear-gradient(to right, transparent, #B5FF33)";
-
+    public String getGradient(double timeLost){
+        String result = "-fx-background-color: linear-gradient(to right, transparent, transparent";
+        // #B5FF33 -- green
+        if (info.times.comm >= timeLost * 0.2)
+            result += ", rgb(173, 255, 47)";
+        if (info.times.idle >= timeLost * 0.2)
+            result += ", rgb(135, 206, 249)";
+        if (info.times.insuf_user >= timeLost * 0.2)
+            result += ", rgb(217, 113, 214)";
+        if (info.times.insuf_sys >= timeLost * 0.2)
+            result += ", rgb(255, 192, 203)";
+        result += ")";
         return result;
     }
 }
