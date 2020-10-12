@@ -2,3 +2,5 @@
 target/*
 target/classes/LibraryImport.class
 target/classes/json/UseStatJson.class
+*.json
+*.c

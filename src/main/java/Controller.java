@@ -17,29 +17,63 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
+import jdk.nashorn.internal.runtime.regexp.joni.Regex;
+import json.IntervalJson;
 import json.ProcTimesJson;
 import json.UseStatJson;
 
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class Controller {
 
     @FXML private TabPane tabPane;
     @FXML private Button loadStatButton;
-    @FXML private Label label1;
     @FXML private TextField loadPath;
     @FXML private Label statLabel;
     @FXML private TreeView<IntervalPane> statTreeView;
     @FXML private TableView statTableView;
     @FXML private StackedBarChart statChart;
     private double lostTime = 0;
+    private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
     private void selectTab(int tabIndex){
         tabPane.getSelectionModel().select(tabIndex);
+    }
+
+    public void initController(){
+        initStatTable();
+    }
+
+    private void initStatTable(){
+        for (Object o : statTableView.getColumns()){
+            TableColumn tc = (TableColumn)o;
+            switch (tc.getText()) {
+                case "Статистика выполнения":
+                    tc.setCellValueFactory(new PropertyValueFactory<StatRow, String>("statInfo"));
+                    break;
+                case "Дата загрузки":
+                    tc.setCellValueFactory(new PropertyValueFactory<StatRow, String>("creationTime"));
+                    break;
+            }
+        }
+        LoadStatList();
     }
 
     //-----  Recursive function to add blink for expanded items in statTreeView  -----//
@@ -134,7 +168,8 @@ public class Controller {
         statTreeView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         statTreeView.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) -> {
-                    initStatChart(newValue.getValue().getInterval());
+                    if (newValue != null)
+                        initStatChart(newValue.getValue().getInterval());
         });
 
         statTreeView.getSelectionModel().select(0);
@@ -142,17 +177,103 @@ public class Controller {
 
     }
 
-    @FXML public void LoadStat() throws Exception{
-        String stat = LibraryImport.readStat(loadPath.getText());
-        if (stat == null) {
-            ErrorDialog errorDialog = new ErrorDialog("Не найден файл \"" + loadPath.getText()
-                + "\".");
+    @FXML public void loadStat() throws Exception{
+        //TODO: load stat
+        int size = statTableView.getSelectionModel().getSelectedItems().size();
+        if (size != 1){
+            ErrorDialog errorDialog = new ErrorDialog("Пожалуйста, выберите одну статистику для загрузки.");
             errorDialog.showDialog();
             return;
         }
-        initStat(new Stat(UseStatJson.GetStat(stat), "", false));
-        label1.setText("Loaded!");
+        StatRow statRow = (StatRow) statTableView.getSelectionModel().getSelectedItem();
+        initStat(statRow.getStat());
         selectTab(1);
+    }
+
+    // Добавить статистику в StatTableView
+    private void AddStatToList(Stat stat, String creationTime)
+    {
+        statTableView.getItems().add(new StatRow(stat.getHeader(), creationTime, stat));
+    }
+
+    public void LoadStatList()
+    {
+        statTableView.getItems().clear();
+        File statDir = new File(Main.StatDirPath);
+        File[] dirs = statDir.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File current, String name) {
+                return new File(current, name).isDirectory() && Pattern.compile("-?[0-9]*$").matcher(name).matches();
+            }
+        });
+
+        File file;
+        String creationTime;
+        if (dirs == null)
+            return;
+        for (File dir : dirs)
+        {
+            try {
+                file = dir.listFiles(new FilenameFilter() {
+                    @Override
+                    public boolean accept(File current, String name) {
+                        return Pattern.compile(".*json$").matcher(name).matches();
+                    }
+                })[0];
+                long cTime = ((FileTime) Files.getAttribute(file.toPath(), "creationTime")).toMillis();
+                ZonedDateTime t = Instant.ofEpochMilli(cTime).atZone(ZoneId.systemDefault());
+                creationTime = dtf.format(t);
+                String json = Main.readFile(file.getAbsolutePath(), StandardCharsets.UTF_8);
+                Stat stat = new Stat(json, dir.getAbsolutePath(), false);
+                AddStatToList(stat, creationTime);
+            } catch (Exception e){
+                System.out.println("Error occurred loading dir " + dir);
+                System.out.println(e.toString());
+            }
+
+        }
+//        DataSource.StatDirs.Sort((StatDir x, StatDir y)
+//                => DateTime.Compare(x.creationTime, y.creationTime));
+//        StatTableView.DataSource = DataSource;
+//        StatTableView.Delegate = new StatTableDelegate();
+    }
+
+    @FXML public void saveStat() throws Exception{
+        Stat stat;
+        String res = LibraryImport.readStat(loadPath.getText());
+        if (res == null) {
+            ErrorDialog errorDialog = new ErrorDialog("Не найден файл \"" + loadPath.getText()
+                    + "\".");
+            errorDialog.showDialog();
+            return;
+        }
+        // Директория с загружаемым файлом
+        String tmpFileLocDir = new File(loadPath.getText()).getParentFile().getAbsolutePath();
+        stat = new Stat(res, tmpFileLocDir, false);
+        System.out.println(tmpFileLocDir);
+        //---  Save files  ---//
+        String tmpDirPath = Main.StatDirPath + stat.hashCode();
+        Files.createDirectory(Paths.get(tmpDirPath));
+        LocalDateTime creationTime = LocalDateTime.now();
+        FileWriter writer = new FileWriter(tmpDirPath + "/stat.json");
+        writer.write(res);
+        writer.close();
+
+        for (IntervalJson inter : stat.info.inter)
+        {
+            if (!Files.exists(Paths.get(tmpDirPath + '/' + inter.id.pname)))
+                try
+                {
+                    if (Files.exists(Paths.get(tmpFileLocDir + '/' + inter.id.pname)))
+                        Files.copy(Paths.get(tmpFileLocDir + '/' + inter.id.pname),
+                                Paths.get(tmpDirPath + '/' + inter.id.pname));
+                }
+                catch (Exception e)
+                {
+                    System.out.println("Could not copy file '" + inter.id.pname + "'");
+                }
+        }
+        AddStatToList(stat, dtf.format(creationTime));
     }
 
 }

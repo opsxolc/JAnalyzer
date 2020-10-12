@@ -63,7 +63,6 @@ public class Interval {
 
     public String getGradient(double timeLost){
         String result = "-fx-background-color: linear-gradient(to right, transparent, transparent";
-        // #B5FF33 -- green
         if (info.times.comm >= timeLost * 0.2)
             result += ", rgb(173, 255, 47)";
         if (info.times.idle >= timeLost * 0.2)
