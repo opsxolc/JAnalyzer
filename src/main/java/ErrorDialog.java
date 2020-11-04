@@ -10,9 +10,15 @@ public class ErrorDialog {
     private ErrorController errorController;
     private Stage stage;
 
-    public ErrorDialog(String message) throws Exception{
+    public ErrorDialog(String message){
         FXMLLoader fxmlLoader = new FXMLLoader();
-        Pane p = fxmlLoader.load(getClass().getResource("errorForm.fxml").openStream());
+        Pane p;
+        try {
+            p = fxmlLoader.load(getClass().getResource("errorForm.fxml").openStream());
+        } catch (Exception e){
+            System.out.println("Error opening ErrorDialog: " + e);
+            return;
+        }
         errorController = fxmlLoader.getController();
         errorController.setMessage(message);
         Scene scene = new Scene(p);

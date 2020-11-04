@@ -9,6 +9,7 @@ import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
@@ -37,9 +38,11 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class Controller {
 
@@ -48,10 +51,11 @@ public class Controller {
     @FXML private TextField loadPath;
     @FXML private Label statLabel;
     @FXML private TreeView<IntervalPane> statTreeView;
-    @FXML private TableView statTableView;
+    @FXML private TableView<StatRow> statTableView;
     @FXML private StackedBarChart statChart;
     private double lostTime = 0;
     private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+    public static ArrayList<Stat> compareList = new ArrayList<>();
 
     private void selectTab(int tabIndex){
         tabPane.getSelectionModel().select(tabIndex);
@@ -62,14 +66,15 @@ public class Controller {
     }
 
     private void initStatTable(){
+        statTableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         for (Object o : statTableView.getColumns()){
-            TableColumn tc = (TableColumn)o;
+            TableColumn<StatRow, String> tc = (TableColumn<StatRow, String>)o;
             switch (tc.getText()) {
                 case "Статистика выполнения":
-                    tc.setCellValueFactory(new PropertyValueFactory<StatRow, String>("statInfo"));
+                    tc.setCellValueFactory(new PropertyValueFactory<>("statInfo"));
                     break;
                 case "Дата загрузки":
-                    tc.setCellValueFactory(new PropertyValueFactory<StatRow, String>("creationTime"));
+                    tc.setCellValueFactory(new PropertyValueFactory<>("creationTime"));
                     break;
             }
         }
@@ -137,10 +142,7 @@ public class Controller {
         }
 
 
-        if (interval.info.id.nlev == 0)
-            statChart.getYAxis().setAutoRanging(true);
-        else
-            statChart.getYAxis().setAutoRanging(false);
+        statChart.getYAxis().setAutoRanging(interval.info.id.nlev == 0);
         statChart.getYAxis().setTickMarkVisible(true);
         statChart.getYAxis().setTickLabelsVisible(true);
 
@@ -178,7 +180,6 @@ public class Controller {
     }
 
     @FXML public void loadStat() throws Exception{
-        //TODO: load stat
         int size = statTableView.getSelectionModel().getSelectedItems().size();
         if (size != 1){
             ErrorDialog errorDialog = new ErrorDialog("Пожалуйста, выберите одну статистику для загрузки.");
@@ -200,13 +201,8 @@ public class Controller {
     {
         statTableView.getItems().clear();
         File statDir = new File(Main.StatDirPath);
-        File[] dirs = statDir.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File current, String name) {
-                return new File(current, name).isDirectory() && Pattern.compile("-?[0-9]*$").matcher(name).matches();
-            }
-        });
-
+        File[] dirs = statDir.listFiles((current, name) ->
+                new File(current, name).isDirectory() && Pattern.compile("-?[0-9]*$").matcher(name).matches());
         File file;
         String creationTime;
         if (dirs == null)
@@ -214,12 +210,10 @@ public class Controller {
         for (File dir : dirs)
         {
             try {
-                file = dir.listFiles(new FilenameFilter() {
-                    @Override
-                    public boolean accept(File current, String name) {
-                        return Pattern.compile(".*json$").matcher(name).matches();
-                    }
-                })[0];
+                File[] files = dir.listFiles((current, name) -> Pattern.compile(".*json$").matcher(name).matches());
+                if (files == null || files.length == 0)
+                    throw new Exception("No json stat file in directory " + dir.getName());
+                file = files[0];
                 long cTime = ((FileTime) Files.getAttribute(file.toPath(), "creationTime")).toMillis();
                 ZonedDateTime t = Instant.ofEpochMilli(cTime).atZone(ZoneId.systemDefault());
                 creationTime = dtf.format(t);
@@ -232,10 +226,28 @@ public class Controller {
             }
 
         }
-//        DataSource.StatDirs.Sort((StatDir x, StatDir y)
-//                => DateTime.Compare(x.creationTime, y.creationTime));
-//        StatTableView.DataSource = DataSource;
-//        StatTableView.Delegate = new StatTableDelegate();
+    }
+
+    @FXML public void compareStats(){
+        ObservableList<StatRow> selected = statTableView.getSelectionModel().getSelectedItems();
+        if (selected.size() <= 1) {
+            ErrorDialog errorDialog = new ErrorDialog("Пожалуйста, выберите две или более статистик для сравнения.");
+            errorDialog.showDialog();
+            return;
+        }
+        compareList = (ArrayList<Stat>) selected.stream().map(elt -> elt.getStat().clone()).collect(Collectors.toList());
+        System.out.println("--- BEFORE ---");
+        for (Stat st : compareList){
+            System.out.println(st + "\n");
+        }
+        Stat.intersectStats(compareList);
+        System.out.println("--- AFTER ---");
+        for (Stat st : compareList){
+            System.out.println(st + "\n");
+        }
+//        System.out.println(compareList.get(0).interval.intervals.size());
+//        Stat.cutIntervals(compareList.stream().map(elt -> elt.interval.intervals).collect(Collectors.toList()));
+//        System.out.println(compareList.get(0).interval.intervals.size());
     }
 
     @FXML public void saveStat() throws Exception{
@@ -274,6 +286,17 @@ public class Controller {
                 }
         }
         AddStatToList(stat, dtf.format(creationTime));
+    }
+
+    @FXML public void deleteStat(){
+        int size = statTableView.getSelectionModel().getSelectedItems().size();
+        if (size == 0){
+            ErrorDialog errorDialog = new ErrorDialog("Пожалуйста, выберите статистики для удаления.");
+            errorDialog.showDialog();
+            return;
+        }
+        // TODO: delete stats
+//        StatRow statRow = (StatRow) statTableView.getSelectionModel().getSelectedItem();
     }
 
 }

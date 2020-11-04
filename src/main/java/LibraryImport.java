@@ -7,7 +7,6 @@ public class LibraryImport {
     }
 
     static {
-//        nativeLibPath += "/HelloJNI.dll"; //HelloJNI.so or HelloJNI.jnilib for UNIX
         String nativeLibPath = System.getProperty("user.dir") + "/src/main/resources/libLibraryImport.jnilib";
         try {
             System.load(nativeLibPath);

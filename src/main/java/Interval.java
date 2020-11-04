@@ -2,11 +2,28 @@ import json.IntervalJson;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class Interval {
-    public List<Interval> intervals = new ArrayList<Interval>();
+public class Interval implements Cloneable {
+    public List<Interval> intervals = new ArrayList<>();
     public IntervalJson info;
     public String text = "";
+
+    public Interval(){}
+
+    public Interval clone(){
+        Interval res;
+        try {
+            res = (Interval) super.clone();
+        } catch (Exception e) {
+            System.out.println("Couldn't clone Interval");
+            return null;
+        }
+        res.info = info;
+        res.text = text;
+        res.intervals = intervals.stream().map(Interval::clone).collect(Collectors.toList());
+        return res;
+    }
 
 //    public bool HasChildLoopInterval
 //    {
@@ -73,5 +90,16 @@ public class Interval {
             result += ", rgb(255, 192, 203)";
         result += ")";
         return result;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < info.id.nlev; ++i)
+            sb.append('\t');
+        sb.append(info.id.expr).append(" - ").append(String.format("%.2f", info.times.exec_time));
+        for (Interval inter : intervals)
+            sb.append('\n').append(inter.toString());
+        return sb.toString();
     }
 }

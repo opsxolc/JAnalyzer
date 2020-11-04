@@ -34,6 +34,8 @@
               </columns>
             </TableView>
             <Button fx:id="loadStatButton" layoutX="552.0" layoutY="45.0" onAction="#loadStat" prefWidth="89.0" text="Загрузить" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="45.0" />
+            <Button fx:id="compareButton" layoutX="552.0" layoutY="82.0" onAction="#compareStats" prefWidth="89.0" text="Сравнить" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="81.0" />
+            <Button fx:id="deleteButton" layoutX="552.0" layoutY="118.0" onAction="#deleteStat" prefWidth="89.0" text="Удалить" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="118.0" />
         </AnchorPane>
     </Tab>
     <Tab fx:id="showStatTab" closable="false" text="Единичная статистика">
