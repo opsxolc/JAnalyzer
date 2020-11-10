@@ -5,59 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="dc13690a-8505-4755-b0fa-dd824a8ba943" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/artifacts/Analyzer.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_google_code_gson_gson_2_8_6.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_jetbrains_annotations_20_1_0.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Analyzer.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/uiDesigner.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Analyzer.iml" beforeDir="false" afterPath="$PROJECT_DIR$/Analyzer.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Controller.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ErrorDialog.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ErrorDialog.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Interval.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Interval.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/LibraryImport.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/LibraryImport.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Stat.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Stat.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/main.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/main.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/LibraryImport.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/META-INF/Analyzer.kotlin_module" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/intellij/uiDesigner/core/AbstractLayout.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/intellij/uiDesigner/core/DimensionInfo.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/intellij/uiDesigner/core/GridConstraints.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/intellij/uiDesigner/core/GridLayoutManager.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/intellij/uiDesigner/core/HorizontalInfo.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/intellij/uiDesigner/core/LayoutState.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/intellij/uiDesigner/core/Spacer.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/intellij/uiDesigner/core/SupportCode$TextWithMnemonic.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/intellij/uiDesigner/core/SupportCode.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/intellij/uiDesigner/core/Util.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/intellij/uiDesigner/core/VerticalInfo.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/json/ColOpJson.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/json/GPUMetricJson.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/json/GPUTimesJson.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/json/IdentJson.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/json/InterTimesJson.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/json/IntervalJson.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/json/ProcInfoJson.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/json/ProcTimesJson.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/json/StatJson.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/json/ThTimesJson.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/json/UseStatJson.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/intellij/uiDesigner/core/AbstractLayout.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/intellij/uiDesigner/core/DimensionInfo.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/intellij/uiDesigner/core/GridConstraints.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/intellij/uiDesigner/core/GridLayoutManager.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/intellij/uiDesigner/core/HorizontalInfo.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/intellij/uiDesigner/core/LayoutState.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/intellij/uiDesigner/core/Spacer.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/intellij/uiDesigner/core/SupportCode$TextWithMnemonic.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/intellij/uiDesigner/core/SupportCode.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/intellij/uiDesigner/core/Util.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/com/intellij/uiDesigner/core/VerticalInfo.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Main.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -89,12 +38,23 @@
     <property name="project.structure.last.edited" value="Problems" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
-    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
   </component>
   <component name="RunManager">
     <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="Main" />
       <module name="Analyzer" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
+      <option name="arquillianRunConfiguration">
+        <value>
+          <option name="containerStateName" value="" />
+        </value>
+      </option>
+      <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -118,7 +78,10 @@
       <workItem from="1604310412120" duration="12000" />
       <workItem from="1604313028359" duration="52000" />
       <workItem from="1604313093699" duration="1570000" />
-      <workItem from="1604521819645" duration="3873000" />
+      <workItem from="1604521819645" duration="4197000" />
+      <workItem from="1604766453109" duration="68000" />
+      <workItem from="1604872633637" duration="242000" />
+      <workItem from="1604875747520" duration="937000" />
     </task>
     <servers />
   </component>
@@ -134,29 +97,29 @@
       <screen x="0" y="0" width="1280" height="800" />
     </state>
     <state x="372" y="108" key="#com.intellij.ide.util.MemberChooser/0.0.1280.800@0.0.1280.800" timestamp="1604523604273" />
-    <state width="1238" height="139" key="GridCell.Tab.0.bottom" timestamp="1604527440964">
-      <screen x="0" y="0" width="1280" height="800" />
+    <state width="1238" height="139" key="GridCell.Tab.0.bottom" timestamp="1604732080863">
+      <screen x="0" y="23" width="1280" height="703" />
     </state>
     <state width="1238" height="139" key="GridCell.Tab.0.bottom/0.0.1280.800@0.0.1280.800" timestamp="1604527440964" />
-    <state width="1238" height="139" key="GridCell.Tab.0.bottom/0.23.1280.703@0.23.1280.703" timestamp="1604525391445" />
-    <state width="1238" height="139" key="GridCell.Tab.0.center" timestamp="1604527440962">
-      <screen x="0" y="0" width="1280" height="800" />
+    <state width="1238" height="139" key="GridCell.Tab.0.bottom/0.23.1280.703@0.23.1280.703" timestamp="1604732080863" />
+    <state width="1238" height="139" key="GridCell.Tab.0.center" timestamp="1604732080861">
+      <screen x="0" y="23" width="1280" height="703" />
     </state>
     <state width="1238" height="139" key="GridCell.Tab.0.center/0.0.1280.800@0.0.1280.800" timestamp="1604527440962" />
-    <state width="1238" height="139" key="GridCell.Tab.0.center/0.23.1280.703@0.23.1280.703" timestamp="1604525391442" />
-    <state width="1238" height="139" key="GridCell.Tab.0.left" timestamp="1604527440961">
-      <screen x="0" y="0" width="1280" height="800" />
+    <state width="1238" height="139" key="GridCell.Tab.0.center/0.23.1280.703@0.23.1280.703" timestamp="1604732080861" />
+    <state width="1238" height="139" key="GridCell.Tab.0.left" timestamp="1604732080859">
+      <screen x="0" y="23" width="1280" height="703" />
     </state>
     <state width="1238" height="139" key="GridCell.Tab.0.left/0.0.1280.800@0.0.1280.800" timestamp="1604527440961" />
-    <state width="1238" height="139" key="GridCell.Tab.0.left/0.23.1280.703@0.23.1280.703" timestamp="1604525391437" />
-    <state width="1238" height="139" key="GridCell.Tab.0.right" timestamp="1604527440963">
-      <screen x="0" y="0" width="1280" height="800" />
+    <state width="1238" height="139" key="GridCell.Tab.0.left/0.23.1280.703@0.23.1280.703" timestamp="1604732080859" />
+    <state width="1238" height="139" key="GridCell.Tab.0.right" timestamp="1604732080862">
+      <screen x="0" y="23" width="1280" height="703" />
     </state>
     <state width="1238" height="139" key="GridCell.Tab.0.right/0.0.1280.800@0.0.1280.800" timestamp="1604527440963" />
-    <state width="1238" height="139" key="GridCell.Tab.0.right/0.23.1280.703@0.23.1280.703" timestamp="1604525391444" />
-    <state x="128" y="0" key="SettingsEditor" timestamp="1604313187489">
+    <state width="1238" height="139" key="GridCell.Tab.0.right/0.23.1280.703@0.23.1280.703" timestamp="1604732080862" />
+    <state x="133" y="39" key="SettingsEditor" timestamp="1604908547187">
       <screen x="0" y="0" width="1280" height="800" />
     </state>
-    <state x="128" y="0" key="SettingsEditor/0.0.1280.800@0.0.1280.800" timestamp="1604313187489" />
+    <state x="133" y="39" key="SettingsEditor/0.0.1280.800@0.0.1280.800" timestamp="1604908547187" />
   </component>
 </project>

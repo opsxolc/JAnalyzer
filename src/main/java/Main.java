@@ -12,8 +12,7 @@ import java.nio.file.Paths;
 
 public class Main extends Application {
 
-    // TODO: убрать хардкод
-    public static String StatDirPath = "/Users/penek/Analyzer/statistics/";
+    public static String StatDirPath = System.getProperty("user.dir") + "/statistics/";
 
     public static String readFile(String path, Charset encoding)
             throws IOException
