@@ -5,13 +5,24 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="dc13690a-8505-4755-b0fa-dd824a8ba943" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/IntervalComparePane.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/StatCompareTreeItem1Controller.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/statCompareTreeItem1.fxml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Controller.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/main.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/main.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -33,6 +44,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/main/resources" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="project.structure.last.edited" value="Problems" />
@@ -40,21 +52,18 @@
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
   </component>
+  <component name="RecentsManager">
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/main/resources" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="Main" />
       <module name="Analyzer" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
-      <option name="arquillianRunConfiguration">
-        <value>
-          <option name="containerStateName" value="" />
-        </value>
-      </option>
-      <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -81,7 +90,11 @@
       <workItem from="1604521819645" duration="4197000" />
       <workItem from="1604766453109" duration="68000" />
       <workItem from="1604872633637" duration="242000" />
-      <workItem from="1604875747520" duration="937000" />
+      <workItem from="1604875747520" duration="1159000" />
+      <workItem from="1605988592660" duration="416000" />
+      <workItem from="1607320710672" duration="4276000" />
+      <workItem from="1607927473951" duration="2738000" />
+      <workItem from="1608456285614" duration="5859000" />
     </task>
     <servers />
   </component>
@@ -97,29 +110,37 @@
       <screen x="0" y="0" width="1280" height="800" />
     </state>
     <state x="372" y="108" key="#com.intellij.ide.util.MemberChooser/0.0.1280.800@0.0.1280.800" timestamp="1604523604273" />
-    <state width="1238" height="139" key="GridCell.Tab.0.bottom" timestamp="1604732080863">
-      <screen x="0" y="23" width="1280" height="703" />
+    <state width="1238" height="77" key="GridCell.Tab.0.bottom" timestamp="1608463277680">
+      <screen x="0" y="0" width="1280" height="800" />
     </state>
-    <state width="1238" height="139" key="GridCell.Tab.0.bottom/0.0.1280.800@0.0.1280.800" timestamp="1604527440964" />
-    <state width="1238" height="139" key="GridCell.Tab.0.bottom/0.23.1280.703@0.23.1280.703" timestamp="1604732080863" />
-    <state width="1238" height="139" key="GridCell.Tab.0.center" timestamp="1604732080861">
-      <screen x="0" y="23" width="1280" height="703" />
+    <state width="1238" height="77" key="GridCell.Tab.0.bottom/0.0.1280.800@0.0.1280.800" timestamp="1608463277680" />
+    <state width="1238" height="107" key="GridCell.Tab.0.bottom/0.23.1280.703@0.23.1280.703" timestamp="1607345922135" />
+    <state width="1238" height="107" key="GridCell.Tab.0.bottom/0.23.1280.708@0.23.1280.708" timestamp="1607930769169" />
+    <state width="1238" height="77" key="GridCell.Tab.0.center" timestamp="1608463277678">
+      <screen x="0" y="0" width="1280" height="800" />
     </state>
-    <state width="1238" height="139" key="GridCell.Tab.0.center/0.0.1280.800@0.0.1280.800" timestamp="1604527440962" />
-    <state width="1238" height="139" key="GridCell.Tab.0.center/0.23.1280.703@0.23.1280.703" timestamp="1604732080861" />
-    <state width="1238" height="139" key="GridCell.Tab.0.left" timestamp="1604732080859">
-      <screen x="0" y="23" width="1280" height="703" />
+    <state width="1238" height="77" key="GridCell.Tab.0.center/0.0.1280.800@0.0.1280.800" timestamp="1608463277678" />
+    <state width="1238" height="107" key="GridCell.Tab.0.center/0.23.1280.703@0.23.1280.703" timestamp="1607345922133" />
+    <state width="1238" height="107" key="GridCell.Tab.0.center/0.23.1280.708@0.23.1280.708" timestamp="1607930769166" />
+    <state width="1238" height="77" key="GridCell.Tab.0.left" timestamp="1608463277677">
+      <screen x="0" y="0" width="1280" height="800" />
     </state>
-    <state width="1238" height="139" key="GridCell.Tab.0.left/0.0.1280.800@0.0.1280.800" timestamp="1604527440961" />
-    <state width="1238" height="139" key="GridCell.Tab.0.left/0.23.1280.703@0.23.1280.703" timestamp="1604732080859" />
-    <state width="1238" height="139" key="GridCell.Tab.0.right" timestamp="1604732080862">
-      <screen x="0" y="23" width="1280" height="703" />
+    <state width="1238" height="77" key="GridCell.Tab.0.left/0.0.1280.800@0.0.1280.800" timestamp="1608463277677" />
+    <state width="1238" height="107" key="GridCell.Tab.0.left/0.23.1280.703@0.23.1280.703" timestamp="1607345922092" />
+    <state width="1238" height="107" key="GridCell.Tab.0.left/0.23.1280.708@0.23.1280.708" timestamp="1607930769164" />
+    <state width="1238" height="77" key="GridCell.Tab.0.right" timestamp="1608463277679">
+      <screen x="0" y="0" width="1280" height="800" />
     </state>
-    <state width="1238" height="139" key="GridCell.Tab.0.right/0.0.1280.800@0.0.1280.800" timestamp="1604527440963" />
-    <state width="1238" height="139" key="GridCell.Tab.0.right/0.23.1280.703@0.23.1280.703" timestamp="1604732080862" />
+    <state width="1238" height="77" key="GridCell.Tab.0.right/0.0.1280.800@0.0.1280.800" timestamp="1608463277679" />
+    <state width="1238" height="107" key="GridCell.Tab.0.right/0.23.1280.703@0.23.1280.703" timestamp="1607345922134" />
+    <state width="1238" height="107" key="GridCell.Tab.0.right/0.23.1280.708@0.23.1280.708" timestamp="1607930769167" />
     <state x="133" y="39" key="SettingsEditor" timestamp="1604908547187">
       <screen x="0" y="0" width="1280" height="800" />
     </state>
     <state x="133" y="39" key="SettingsEditor/0.0.1280.800@0.0.1280.800" timestamp="1604908547187" />
+    <state x="305" y="124" width="670" height="676" key="search.everywhere.popup" timestamp="1608460293509">
+      <screen x="0" y="0" width="1280" height="800" />
+    </state>
+    <state x="305" y="124" width="670" height="676" key="search.everywhere.popup/0.0.1280.800@0.0.1280.800" timestamp="1608460293509" />
   </component>
 </project>

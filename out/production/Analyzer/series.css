@@ -1,0 +1,40 @@
+.chart {
+    -fx-padding: 5px;
+    -fx-background-color: white;
+    /*-fx-background-image: url("icon.png");*/
+}
+.chart-content {
+    -fx-padding: 5px;
+    -fx-background-color: transparent;
+
+}
+
+.chart-legend {
+    -fx-background-color: transparent;
+    -fx-padding: 0px;
+}
+
+.chart-legend-item-symbol{
+    -fx-background-radius: 0;
+}
+
+.chart-legend-item{
+    -fx-text-fill: #191970;
+}
+
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.default-color0.chart-bar {
+    -fx-background-color: #ffc0cb;
+}
+.default-color1.chart-bar {
+    -fx-background-color: #d971d6;
+}
+.default-color2.chart-bar {
+    -fx-background-color: #87cef9;
+}
+.default-color3.chart-bar {
+    -fx-background-color: #adff2f;
+}

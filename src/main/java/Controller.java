@@ -19,6 +19,7 @@ import javafx.scene.Parent;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
@@ -38,22 +39,24 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Controller {
 
     @FXML private TabPane tabPane;
-    @FXML private Button loadStatButton;
     @FXML private TextField loadPath;
     @FXML private Label statLabel;
     @FXML private TreeView<IntervalPane> statTreeView;
+    @FXML private TreeView<IntervalComparePane> statCompareTreeView;
+    @FXML private SplitPane compareSplitPane;
     @FXML private TableView<StatRow> statTableView;
     @FXML private StackedBarChart statChart;
+    @FXML private StackedBarChart statCompareChart;
     private double lostTime = 0;
+    private double lostCompareTime = 0;
     private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
     public static ArrayList<Stat> compareList = new ArrayList<>();
 
@@ -82,7 +85,7 @@ public class Controller {
     }
 
     //-----  Recursive function to add blink for expanded items in statTreeView  -----//
-    private void addBlink(TreeItem<IntervalPane> treeItem){
+    private void addBlink(TreeItem<IntervalPane> treeItem) {
         new Timeline(
                 new KeyFrame(Duration.seconds(0),
                         new KeyValue(treeItem.getValue().opacityProperty(), 1.0)),
@@ -91,8 +94,23 @@ public class Controller {
                 new KeyFrame(Duration.seconds(0.7),
                         new KeyValue(treeItem.getValue().opacityProperty(), 1.0, Interpolator.EASE_OUT))
         ).play();
-        for (TreeItem<IntervalPane> item: treeItem.getChildren()) {
+        for (TreeItem<IntervalPane> item : treeItem.getChildren()) {
             addBlink(item);
+        }
+    }
+
+    //-----  Recursive function to add blink for expanded items in statCompareTreeView  -----//
+    private void addBlinkCompare(TreeItem<IntervalComparePane> treeItem) {
+        new Timeline(
+                new KeyFrame(Duration.seconds(0),
+                        new KeyValue(treeItem.getValue().opacityProperty(), 1.0)),
+                new KeyFrame(Duration.seconds(0.3),
+                        new KeyValue(treeItem.getValue().opacityProperty(), 0.3, Interpolator.EASE_OUT)),
+                new KeyFrame(Duration.seconds(0.7),
+                        new KeyValue(treeItem.getValue().opacityProperty(), 1.0, Interpolator.EASE_OUT))
+        ).play();
+        for (TreeItem<IntervalComparePane> item : treeItem.getChildren()) {
+            addBlinkCompare(item);
         }
     }
 
@@ -159,6 +177,46 @@ public class Controller {
         statChart.setCategoryGap(20);
     }
 
+    //-----  Initializes stacked bar chart for comparison selected interval  -----//
+    private void initCompareLostChart(List<Interval> intervals, List<String> p_headings){
+        XYChart.Series<String, Double> series1 = new XYChart.Series<>();
+        XYChart.Series<String, Double> series2 = new XYChart.Series<>();
+        XYChart.Series<String, Double> series3 = new XYChart.Series<>();
+        XYChart.Series<String, Double> series4 = new XYChart.Series<>();
+        series1.setName("Недостаточный параллелизм (sys)");
+        series2.setName("Недостаточный параллелизм (user)");
+        series3.setName("Простои");
+        series4.setName("Коммуникации");
+
+        //-----  Init lost time data  ------//
+        for (int i = 0; i < intervals.size(); ++i){
+            String xname = p_headings.get(i) + "\n"
+                    + String.format("%.2f", intervals.get(i).info.times.exec_time) + "\n"
+                    + String.format("%.2f", intervals.get(i).info.times.efficiency) + "\n"
+                    + intervals.get(i).info.id.pname + " (" + i + ")";
+            series1.getData().add(new XYChart.Data<>(xname, intervals.get(i).info.times.insuf_sys));
+            series2.getData().add(new XYChart.Data<>(xname, intervals.get(i).info.times.insuf_user));
+            series3.getData().add(new XYChart.Data<>(xname, intervals.get(i).info.times.idle));
+            series4.getData().add(new XYChart.Data<>(xname, intervals.get(i).info.times.comm));
+        }
+
+        statCompareChart.getYAxis().setAutoRanging(intervals.get(0).info.id.nlev == 0);
+        statCompareChart.getYAxis().setTickMarkVisible(true);
+        statCompareChart.getYAxis().setTickLabelsVisible(true);
+
+        statCompareChart.getData().clear();
+        statCompareChart.getData().addAll(series1, series2, series3, series4);
+
+        //-----  Display labels  -----//
+        for (int i = 0; i < intervals.size(); ++i){
+            displayLabelForData(series1.getData().get(i));
+            displayLabelForData(series2.getData().get(i));
+            displayLabelForData(series3.getData().get(i));
+            displayLabelForData(series4.getData().get(i));
+        }
+        statCompareChart.setCategoryGap(20);
+    }
+
     private void initStat(@org.jetbrains.annotations.NotNull Stat stat) throws Exception{
         statLabel.setText(stat.getHeader());
 
@@ -175,8 +233,56 @@ public class Controller {
         });
 
         statTreeView.getSelectionModel().select(0);
+    }
 
+    private TreeItem<IntervalComparePane> getRootWithChildren(List<Interval> intervals,
+                                                              List<String> pHeadings) throws Exception{
+        FXMLLoader fxmlLoader = new FXMLLoader();
+        IntervalComparePane p = new IntervalComparePane(fxmlLoader.load(getClass().getResource("statCompareTreeItem1.fxml").openStream()));
+        StatCompareTreeItem1Controller controller = fxmlLoader.getController();
+        int max_time_index = 0;
+        int min_time_index = 0;
+        for (int i = 0; i < intervals.size(); ++i) {
+            if (intervals.get(max_time_index).info.times.exec_time < intervals.get(i).info.times.exec_time) {
+                max_time_index = i;
+            } else {
+                min_time_index = i;
+            }
+        }
+        controller.init(pHeadings.get(max_time_index), pHeadings.get(min_time_index),
+                intervals.get(max_time_index).info.times.exec_time, intervals.get(min_time_index).info.times.exec_time);
+        //TODO: определять тип интервала и показывать слева значение
+        p.setStyle(intervals.get(max_time_index).getGradient(lostCompareTime));
+        p.setIntervals(intervals);
+        p.setPHeadings(pHeadings);
+        TreeItem<IntervalComparePane> treeItem = new TreeItem<>(p);
+        for (int i = 0; i < intervals.get(0).intervals.size(); ++i) {
+            int finalI = i;
+            List<Interval> subIntervals = intervals.stream().map(elt -> elt.intervals.get(finalI)).collect(Collectors.toList());
+            treeItem.getChildren().add(getRootWithChildren(subIntervals, pHeadings));
+        }
+        treeItem.expandedProperty().addListener((observable, oldValue, newValue) -> addBlinkCompare(treeItem));
+        treeItem.setExpanded(true);
+        return treeItem;
+    }
 
+    private void initCompareIntervalTree(List<Stat> compareList) throws Exception{
+
+        //-----  Init tree  -----//
+        lostCompareTime = Collections.max(compareList.stream().map(elt -> elt.interval.info.times.lost_time).collect(Collectors.toList()));
+        TreeItem<IntervalComparePane> root = getRootWithChildren(compareList.stream().map(elt -> elt.interval).collect(Collectors.toList()),
+                compareList.stream().map(elt -> elt.info.p_heading).collect(Collectors.toList()));
+        statCompareTreeView.setRoot(root);
+
+        statCompareTreeView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        statCompareTreeView.getSelectionModel().selectedItemProperty().addListener(
+                (observable, oldValue, newValue) -> {
+                    if (newValue != null)
+                        initCompareLostChart(newValue.getValue().getIntervals(), newValue.getValue().getPHeadings());
+                });
+        initCompareLostChart(compareList.stream().map(elt -> elt.interval).collect(Collectors.toList()),
+                compareList.stream().map(elt -> elt.info.p_heading).collect(Collectors.toList()));
+        statTreeView.getSelectionModel().select(0);
     }
 
     @FXML public void loadStat() throws Exception{
@@ -231,23 +337,19 @@ public class Controller {
     @FXML public void compareStats(){
         ObservableList<StatRow> selected = statTableView.getSelectionModel().getSelectedItems();
         if (selected.size() <= 1) {
-            ErrorDialog errorDialog = new ErrorDialog("Пожалуйста, выберите две или более статистик для сравнения.");
+            ErrorDialog errorDialog = new ErrorDialog("Пожалуйста, выберите две или более статистики для сравнения.");
             errorDialog.showDialog();
             return;
         }
         compareList = (ArrayList<Stat>) selected.stream().map(elt -> elt.getStat().clone()).collect(Collectors.toList());
-        System.out.println("--- BEFORE ---");
-        for (Stat st : compareList){
-            System.out.println(st + "\n");
-        }
         Stat.intersectStats(compareList);
-        System.out.println("--- AFTER ---");
-        for (Stat st : compareList){
-            System.out.println(st + "\n");
+        try {
+            initCompareIntervalTree(compareList);
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            return;
         }
-//        System.out.println(compareList.get(0).interval.intervals.size());
-//        Stat.cutIntervals(compareList.stream().map(elt -> elt.interval.intervals).collect(Collectors.toList()));
-//        System.out.println(compareList.get(0).interval.intervals.size());
+        selectTab(2);
     }
 
     @FXML public void saveStat() throws Exception{
