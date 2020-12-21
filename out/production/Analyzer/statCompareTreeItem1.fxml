@@ -3,6 +3,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
 
 <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" stylesheets="@../../Analyzer/src/main/resources/bootstrap3.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="StatCompareTreeItem1Controller">
    <children>
@@ -15,5 +16,10 @@
       <Label layoutX="108.0" text="➣" AnchorPane.topAnchor="0.0" />
       <Label layoutX="108.0" layoutY="17.0" text="➣" AnchorPane.bottomAnchor="0.0" />
       <Label fx:id="minLabel" layoutX="51.0" layoutY="17.0" prefHeight="17.0" prefWidth="54.0" text="Label" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="51.0" />
+      <Label fx:id="typeLabel" alignment="CENTER" layoutX="-6.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="15.0" prefWidth="30.0" rotate="-90.0" text="посл" textAlignment="CENTER" AnchorPane.topAnchor="10.0">
+         <font>
+            <Font size="10.0" />
+         </font>
+      </Label>
    </children>
 </AnchorPane>

@@ -9,7 +9,21 @@ public class Interval implements Cloneable {
     public IntervalJson info;
     public String text = "";
 
+    public static final int SEQ = 21, PAR = 22, USER = 23;
+
     public Interval(){}
+
+    public String getType(){
+        switch (info.id.t) {
+            case SEQ:
+                return "Посл";
+            case PAR:
+                return "Пар";
+            case USER:
+                return String.valueOf(info.id.expr);
+            default: return "";
+        }
+    }
 
     public Interval clone(){
         Interval res;

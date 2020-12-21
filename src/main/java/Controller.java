@@ -1,32 +1,18 @@
-import com.sun.javafx.geom.BaseBounds;
-import com.sun.javafx.geom.transform.BaseTransform;
-import com.sun.javafx.jmx.MXNodeAlgorithm;
-import com.sun.javafx.jmx.MXNodeAlgorithmContext;
-import com.sun.javafx.sg.prism.NGNode;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Bounds;
-import javafx.scene.Group;
-import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
-import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 import json.IntervalJson;
 import json.ProcTimesJson;
-import json.UseStatJson;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -48,17 +34,27 @@ public class Controller {
 
     @FXML private TabPane tabPane;
     @FXML private TextField loadPath;
+    @FXML private TextArea statIntervalText;
     @FXML private Label statLabel;
     @FXML private TreeView<IntervalPane> statTreeView;
     @FXML private TreeView<IntervalComparePane> statCompareTreeView;
     @FXML private SplitPane compareSplitPane;
+    @FXML private SplitPane statSplitPane;
     @FXML private TableView<StatRow> statTableView;
     @FXML private StackedBarChart statChart;
     @FXML private StackedBarChart statCompareChart;
+    @FXML private MenuButton sortMenu;
+    @FXML private ToggleButton showCompareTreeButton;
+    @FXML private Button resetStatButton;
+    @FXML private Button resetCompareStatButton;
+
     private double lostTime = 0;
     private double lostCompareTime = 0;
     private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
     public static ArrayList<Stat> compareList = new ArrayList<>();
+
+    private static final String numProcSort = "Кол-во процессоров", lostTimeSort = "Потерянное время",
+            execTimeSort = "Время выполнения", coefSort = "Коэф. эффективности";
 
     private void selectTab(int tabIndex){
         tabPane.getSelectionModel().select(tabIndex);
@@ -66,6 +62,70 @@ public class Controller {
 
     public void initController(){
         initStatTable();
+        resetLoadedStat();
+        resetCompareStat();
+        initSortMenu();
+    }
+
+
+    public void compareSort(String typeCompare){
+        if (compareList.size() == 0)
+            return;
+        compareList.sort((o1, o2) -> {
+            switch (typeCompare) {
+                case numProcSort:
+                    if (o1.interval.info.times.nproc - o2.interval.info.times.nproc > 0) {
+                        return 1;
+                    }
+                    if (o1.interval.info.times.nproc - o2.interval.info.times.nproc < 0) {
+                        return -1;
+                    }
+                    return 0;
+                case lostTimeSort:
+                    if (o1.interval.info.times.lost_time - o2.interval.info.times.lost_time > 0) {
+                        return 1;
+                    }
+                    if (o1.interval.info.times.lost_time - o2.interval.info.times.lost_time < 0) {
+                        return -1;
+                    }
+                    return 0;
+                case execTimeSort:
+                    if (o1.interval.info.times.exec_time - o2.interval.info.times.exec_time > 0) {
+                        return 1;
+                    }
+                    if (o1.interval.info.times.exec_time - o2.interval.info.times.exec_time < 0) {
+                        return -1;
+                    }
+                    return 0;
+                case coefSort:
+                    if (o1.interval.info.times.efficiency - o2.interval.info.times.efficiency > 0) {
+                        return 1;
+                    }
+                    if (o1.interval.info.times.efficiency - o2.interval.info.times.efficiency < 0) {
+                        return -1;
+                    }
+                    return 0;
+            }
+            return 0;
+        });
+        updateCompareRoot(statCompareTreeView.getRoot(),
+                compareList.stream().map(elt -> elt.interval).collect(Collectors.toList()),
+                compareList.stream().map(elt -> elt.info.p_heading).collect(Collectors.toList()));
+        IntervalComparePane selectedItem = statCompareTreeView.getSelectionModel().getSelectedItem().getValue();
+        initCompareLostChart(selectedItem.getIntervals(), selectedItem.getPHeadings());
+    }
+
+    private void initSortMenu(){
+        sortMenu.getItems().clear();
+        MenuItem numProc = new MenuItem(numProcSort);
+        MenuItem lostTime = new MenuItem(lostTimeSort);
+        MenuItem execTime = new MenuItem(execTimeSort);
+        MenuItem coef = new MenuItem(coefSort);
+        sortMenu.getItems().addAll(numProc, lostTime, execTime, coef);
+        numProc.setOnAction(event -> compareSort(numProcSort));
+        lostTime.setOnAction(event -> compareSort(lostTimeSort));
+        execTime.setOnAction(event -> compareSort(execTimeSort));
+        coef.setOnAction(event -> compareSort(coefSort));
     }
 
     private void initStatTable(){
@@ -119,8 +179,7 @@ public class Controller {
         FXMLLoader fxmlLoader = new FXMLLoader();
         IntervalPane p = new IntervalPane(fxmlLoader.load(getClass().getResource("statTreeItem.fxml").openStream()));
         StatTreeItemController controller = fxmlLoader.getController();
-        controller.init(interval.info.times.exec_time, interval.info.times.efficiency);
-        //TODO: определять тип интервала и показывать слева значение
+        controller.init(interval.info.times.exec_time, interval.info.times.efficiency, interval.getType());
         p.setStyle(interval.getGradient(lostTime));
         p.setInterval(interval);
         TreeItem<IntervalPane> treeItem = new TreeItem<>(p);
@@ -131,6 +190,7 @@ public class Controller {
         treeItem.setExpanded(true);
         return treeItem;
     }
+
 
     private void displayLabelForData(XYChart.Data<String, Double> data) {
         StackPane bar = (StackPane) data.getNode();
@@ -233,12 +293,31 @@ public class Controller {
         });
 
         statTreeView.getSelectionModel().select(0);
+        statSplitPane.setDividerPositions(statChart.getWidth() / statSplitPane.getWidth(), 1);
+
+    }
+
+    private void updateCompareRoot(TreeItem<IntervalComparePane> item,
+                                   List<Interval> intervals, List<String> pHeadings){
+        item.getValue().setIntervals(intervals);
+        item.getValue().setPHeadings(pHeadings);
+        for (int i = 0; i < item.getChildren().size(); ++i) {
+            int finalI = i;
+            List<Interval> subIntervals = intervals.stream().map(elt -> elt.intervals.get(finalI)).collect(Collectors.toList());
+            updateCompareRoot(item.getChildren().get(i), subIntervals, pHeadings);
+        }
     }
 
     private TreeItem<IntervalComparePane> getRootWithChildren(List<Interval> intervals,
-                                                              List<String> pHeadings) throws Exception{
+                                                              List<String> pHeadings) {
         FXMLLoader fxmlLoader = new FXMLLoader();
-        IntervalComparePane p = new IntervalComparePane(fxmlLoader.load(getClass().getResource("statCompareTreeItem1.fxml").openStream()));
+        IntervalComparePane p;
+        try {
+             p = new IntervalComparePane(fxmlLoader.load(getClass().getResource("statCompareTreeItem1.fxml").openStream()));
+        } catch (Exception e) {
+            System.out.println("Error loading statCompareTreeItem1.fxml\n" + e.toString());
+            return null;
+        }
         StatCompareTreeItem1Controller controller = fxmlLoader.getController();
         int max_time_index = 0;
         int min_time_index = 0;
@@ -250,8 +329,8 @@ public class Controller {
             }
         }
         controller.init(pHeadings.get(max_time_index), pHeadings.get(min_time_index),
-                intervals.get(max_time_index).info.times.exec_time, intervals.get(min_time_index).info.times.exec_time);
-        //TODO: определять тип интервала и показывать слева значение
+                intervals.get(max_time_index).info.times.exec_time, intervals.get(min_time_index).info.times.exec_time,
+                intervals.get(0).getType());
         p.setStyle(intervals.get(max_time_index).getGradient(lostCompareTime));
         p.setIntervals(intervals);
         p.setPHeadings(pHeadings);
@@ -266,8 +345,7 @@ public class Controller {
         return treeItem;
     }
 
-    private void initCompareIntervalTree(List<Stat> compareList) throws Exception{
-
+    private void initCompareIntervalTree(List<Stat> compareList) {
         //-----  Init tree  -----//
         lostCompareTime = Collections.max(compareList.stream().map(elt -> elt.interval.info.times.lost_time).collect(Collectors.toList()));
         TreeItem<IntervalComparePane> root = getRootWithChildren(compareList.stream().map(elt -> elt.interval).collect(Collectors.toList()),
@@ -280,9 +358,7 @@ public class Controller {
                     if (newValue != null)
                         initCompareLostChart(newValue.getValue().getIntervals(), newValue.getValue().getPHeadings());
                 });
-        initCompareLostChart(compareList.stream().map(elt -> elt.interval).collect(Collectors.toList()),
-                compareList.stream().map(elt -> elt.info.p_heading).collect(Collectors.toList()));
-        statTreeView.getSelectionModel().select(0);
+        statCompareTreeView.getSelectionModel().select(0);
     }
 
     @FXML public void loadStat() throws Exception{
@@ -294,6 +370,7 @@ public class Controller {
         }
         StatRow statRow = (StatRow) statTableView.getSelectionModel().getSelectedItem();
         initStat(statRow.getStat());
+        setDisableLoadedStat(false);
         selectTab(1);
     }
 
@@ -343,13 +420,50 @@ public class Controller {
         }
         compareList = (ArrayList<Stat>) selected.stream().map(elt -> elt.getStat().clone()).collect(Collectors.toList());
         Stat.intersectStats(compareList);
-        try {
-            initCompareIntervalTree(compareList);
-        } catch (Exception e) {
-            System.out.println(e.toString());
-            return;
-        }
+        initCompareIntervalTree(compareList);
+        setDisableCompare(false);
         selectTab(2);
+    }
+
+    @FXML public void resetLoadedStat() {
+        statLabel.setText("");
+        statIntervalText.setText("");
+        statChart.getData().clear();
+        statTreeView.setRoot(null);
+        statSplitPane.setDividerPositions(0, 1);
+        setDisableLoadedStat(true);
+        selectTab(0);
+    }
+
+    private void setDisableLoadedStat(boolean disable) {
+        resetStatButton.setDisable(disable);
+        statSplitPane.setDisable(disable);
+    }
+
+    @FXML public void resetCompareStat() {
+        statCompareChart.getData().clear();
+        statCompareTreeView.setRoot(null);
+        compareSplitPane.setDividerPositions(1);
+        showCompareTreeButton.setSelected(false);
+        setDisableCompare(true);
+        selectTab(0);
+    }
+
+    private void setDisableCompare(boolean disable) {
+        sortMenu.setDisable(disable);
+        showCompareTreeButton.setDisable(disable);
+        compareSplitPane.setDisable(disable);
+        resetCompareStatButton.setDisable(disable);
+    }
+
+    @FXML public void compareShowIntervals() {
+        if (showCompareTreeButton.isSelected()) {
+            compareSplitPane.setDividerPositions((compareSplitPane.getWidth() - statCompareTreeView.getPrefWidth())
+                    / compareSplitPane.getWidth());
+        } else {
+            statCompareTreeView.getSelectionModel().select(0);
+            compareSplitPane.setDividerPositions(1);
+        }
     }
 
     @FXML public void saveStat() throws Exception{

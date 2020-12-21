@@ -1,18 +1,23 @@
 import com.sun.tools.corba.se.idl.ExceptionEntry;
 import json.StatJson;
 import json.UseStatJson;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Stat implements Cloneable{
+public class Stat implements Cloneable, Comparable<Stat>{
 
     public StatJson info;
     public Interval interval;
     public String dir;
 
     public Stat(){}
+
+    public int compareTo(@NotNull Stat compareStat) {
+        return 1;
+    }
 
     public Stat clone(){
         Stat res;
