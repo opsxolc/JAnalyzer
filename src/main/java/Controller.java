@@ -1,3 +1,4 @@
+import com.sun.tools.internal.ws.processor.util.DirectoryUtil;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -13,7 +14,7 @@ import javafx.scene.text.Text;
 import javafx.util.Duration;
 import json.IntervalJson;
 import json.ProcTimesJson;
-
+import org.apache.commons.io.FileUtils;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -512,7 +513,16 @@ public class Controller {
             return;
         }
         // TODO: delete stats
-//        StatRow statRow = (StatRow) statTableView.getSelectionModel().getSelectedItem();
+        List<StatRow> statRows = statTableView.getSelectionModel().getSelectedItems();
+        for (StatRow statRow : statRows) {
+            try {
+                FileUtils.deleteDirectory(new File(statRow.getStat().dir));
+            } catch (Exception e) {
+                System.out.println("Error deleting dir " + statRow.getStat().dir);
+                return;
+            }
+        }
+        statTableView.getItems().removeAll(statRows);
     }
 
 }
