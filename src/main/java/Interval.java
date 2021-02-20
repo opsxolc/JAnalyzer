@@ -1,4 +1,5 @@
 import json.IntervalJson;
+import json.ProcTimesJson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,10 @@ public class Interval implements Cloneable {
         res.text = text;
         res.intervals = intervals.stream().map(Interval::clone).collect(Collectors.toList());
         return res;
+    }
+
+    public long getGPUNum(){
+        return info.proc_times.stream().map(elt -> elt.num_gpu).reduce((long)0, Long::sum);
     }
 
 //    public bool HasChildLoopInterval

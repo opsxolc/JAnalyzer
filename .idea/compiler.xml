@@ -10,7 +10,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="Analyzer" target="1.8" />
+      <module name="Analyzer" target="8" />
     </bytecodeTargetLevel>
   </component>
   <component name="HaskellBuildOptions">

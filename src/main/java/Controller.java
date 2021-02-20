@@ -1,4 +1,3 @@
-import com.sun.tools.internal.ws.processor.util.DirectoryUtil;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -6,17 +5,20 @@ import javafx.animation.Timeline;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.chart.*;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.StackedBarChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import json.IntervalJson;
 import json.ProcTimesJson;
 import org.apache.commons.io.FileUtils;
+
 import java.io.*;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -44,15 +46,24 @@ public class Controller {
     @FXML private TableView<StatRow> statTableView;
     @FXML private StackedBarChart statChart;
     @FXML private StackedBarChart statCompareChart;
+    @FXML private LineChart<String, Double> statCompareGPUChart;
     @FXML private MenuButton sortMenu;
+    @FXML private ChoiceBox<String> compareTypeChoiceBox;
     @FXML private ToggleButton showCompareTreeButton;
     @FXML private Button resetStatButton;
     @FXML private Button resetCompareStatButton;
 
+    enum CompareType {
+        lostTime,
+        GPU
+    }
+
     private double lostTime = 0;
     private double lostCompareTime = 0;
+    private double GPUCompareTime = 0;
     private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
     public static ArrayList<Stat> compareList = new ArrayList<>();
+    public CompareType curCompareType = CompareType.lostTime;
 
     private static final String numProcSort = "Кол-во процессоров", lostTimeSort = "Потерянное время",
             execTimeSort = "Время выполнения", coefSort = "Коэф. эффективности";
@@ -66,54 +77,111 @@ public class Controller {
         resetLoadedStat();
         resetCompareStat();
         initSortMenu();
+        initCompareTypeChoiceBox();
+
+//        //Create PopOver and add look and feel
+//        PopOver popOver = new PopOver(new AnchorPane());
+//
+//        statLabel.setOnMouseEntered(mouseEvent -> {
+//            //Show PopOver when mouse enters label
+//            popOver.show(statLabel);
+//        });
+//
+//        statLabel.setOnMouseExited(mouseEvent -> {
+//            //Hide PopOver when mouse exits label
+//            popOver.hide();
+//        });
     }
 
+    private void initCompareTypeChoiceBox(){
+        compareTypeChoiceBox.getItems().clear();
+        compareTypeChoiceBox.getItems().addAll("Потерянное время", "Сравнение GPU");
+        compareTypeChoiceBox.getSelectionModel().select(0);
+        compareTypeChoiceBox.setOnAction(event -> {
+            switch (compareTypeChoiceBox.getSelectionModel().getSelectedItem()) {
+                case "Потерянное время":
+                    switchCompareType(CompareType.lostTime);
+                    break;
+                case "Сравнение GPU":
+                    switchCompareType(CompareType.GPU);
+            }
+        });
+    }
+
+    private void resetCompareTypeChoiceBox() {
+        compareTypeChoiceBox.getSelectionModel().select(0);
+    }
+
+    private void switchCompareType(CompareType cType){
+        if (curCompareType == cType)
+            return;
+        switch (cType) {
+            case lostTime:
+                curCompareType = CompareType.lostTime;
+                statCompareChart.setVisible(true);
+                statCompareGPUChart.setVisible(false);
+                break;
+            case GPU:
+                curCompareType = CompareType.GPU;
+                statCompareChart.setVisible(false);
+                statCompareGPUChart.setVisible(true);
+                break;
+        }
+        TreeItem<IntervalComparePane> selectedItem = statCompareTreeView.getSelectionModel().getSelectedItem();
+        if (selectedItem != null)
+            initCompareChart(selectedItem.getValue().getIntervals(), selectedItem.getValue().getPHeadings());
+    }
 
     public void compareSort(String typeCompare){
         if (compareList.size() == 0)
             return;
-        compareList.sort((o1, o2) -> {
-            switch (typeCompare) {
-                case numProcSort:
-                    if (o1.interval.info.times.nproc - o2.interval.info.times.nproc > 0) {
-                        return 1;
-                    }
-                    if (o1.interval.info.times.nproc - o2.interval.info.times.nproc < 0) {
-                        return -1;
+        List<Interval> selectedIntervals = statCompareTreeView.getSelectionModel().getSelectedItem()
+                .getValue().getIntervals();
+        compareList = (ArrayList<Stat>) IntStream.range(0, selectedIntervals.size())
+                .boxed().sorted((i, j) -> {
+                    Interval o1 = selectedIntervals.get(i), o2 = selectedIntervals.get(j);
+                    switch (typeCompare) {
+                        case numProcSort:
+                            if (o1.info.times.nproc - o2.info.times.nproc > 0) {
+                                return 1;
+                            }
+                            if (o1.info.times.nproc - o2.info.times.nproc < 0) {
+                                return -1;
+                            }
+                            return 0;
+                        case lostTimeSort:
+                            if (o1.info.times.lost_time - o2.info.times.lost_time > 0) {
+                                return 1;
+                            }
+                            if (o1.info.times.lost_time - o2.info.times.lost_time < 0) {
+                                return -1;
+                            }
+                            return 0;
+                        case execTimeSort:
+                            if (o1.info.times.exec_time - o2.info.times.exec_time > 0) {
+                                return 1;
+                            }
+                            if (o1.info.times.exec_time - o2.info.times.exec_time < 0) {
+                                return -1;
+                            }
+                            return 0;
+                        case coefSort:
+                            if (o1.info.times.efficiency - o2.info.times.efficiency > 0) {
+                                return 1;
+                            }
+                            if (o1.info.times.efficiency - o2.info.times.efficiency < 0) {
+                                return -1;
+                            }
+                            return 0;
                     }
                     return 0;
-                case lostTimeSort:
-                    if (o1.interval.info.times.lost_time - o2.interval.info.times.lost_time > 0) {
-                        return 1;
-                    }
-                    if (o1.interval.info.times.lost_time - o2.interval.info.times.lost_time < 0) {
-                        return -1;
-                    }
-                    return 0;
-                case execTimeSort:
-                    if (o1.interval.info.times.exec_time - o2.interval.info.times.exec_time > 0) {
-                        return 1;
-                    }
-                    if (o1.interval.info.times.exec_time - o2.interval.info.times.exec_time < 0) {
-                        return -1;
-                    }
-                    return 0;
-                case coefSort:
-                    if (o1.interval.info.times.efficiency - o2.interval.info.times.efficiency > 0) {
-                        return 1;
-                    }
-                    if (o1.interval.info.times.efficiency - o2.interval.info.times.efficiency < 0) {
-                        return -1;
-                    }
-                    return 0;
-            }
-            return 0;
-        });
+                })
+                .map(compareList::get).collect(Collectors.toList());
         updateCompareRoot(statCompareTreeView.getRoot(),
                 compareList.stream().map(elt -> elt.interval).collect(Collectors.toList()),
                 compareList.stream().map(elt -> elt.info.p_heading).collect(Collectors.toList()));
         IntervalComparePane selectedItem = statCompareTreeView.getSelectionModel().getSelectedItem().getValue();
-        initCompareLostChart(selectedItem.getIntervals(), selectedItem.getPHeadings());
+        initCompareChart(selectedItem.getIntervals(), selectedItem.getPHeadings());
     }
 
     private void initSortMenu(){
@@ -145,33 +213,18 @@ public class Controller {
         LoadStatList();
     }
 
-    //-----  Recursive function to add blink for expanded items in statTreeView  -----//
-    private void addBlink(TreeItem<IntervalPane> treeItem) {
+    //-----  Recursive function to add blink for expanded items  -----//
+    private void addBlink(TreeItem treeItem) {
         new Timeline(
                 new KeyFrame(Duration.seconds(0),
-                        new KeyValue(treeItem.getValue().opacityProperty(), 1.0)),
+                        new KeyValue(((AnchorPane)treeItem.getValue()).opacityProperty(), 1.0)),
                 new KeyFrame(Duration.seconds(0.3),
-                        new KeyValue(treeItem.getValue().opacityProperty(), 0.3, Interpolator.EASE_OUT)),
+                        new KeyValue(((AnchorPane)treeItem.getValue()).opacityProperty(), 0.3, Interpolator.EASE_OUT)),
                 new KeyFrame(Duration.seconds(0.7),
-                        new KeyValue(treeItem.getValue().opacityProperty(), 1.0, Interpolator.EASE_OUT))
+                        new KeyValue(((AnchorPane)treeItem.getValue()).opacityProperty(), 1.0, Interpolator.EASE_OUT))
         ).play();
-        for (TreeItem<IntervalPane> item : treeItem.getChildren()) {
-            addBlink(item);
-        }
-    }
-
-    //-----  Recursive function to add blink for expanded items in statCompareTreeView  -----//
-    private void addBlinkCompare(TreeItem<IntervalComparePane> treeItem) {
-        new Timeline(
-                new KeyFrame(Duration.seconds(0),
-                        new KeyValue(treeItem.getValue().opacityProperty(), 1.0)),
-                new KeyFrame(Duration.seconds(0.3),
-                        new KeyValue(treeItem.getValue().opacityProperty(), 0.3, Interpolator.EASE_OUT)),
-                new KeyFrame(Duration.seconds(0.7),
-                        new KeyValue(treeItem.getValue().opacityProperty(), 1.0, Interpolator.EASE_OUT))
-        ).play();
-        for (TreeItem<IntervalComparePane> item : treeItem.getChildren()) {
-            addBlinkCompare(item);
+        for (Object item : treeItem.getChildren()) {
+            addBlink((TreeItem) item);
         }
     }
 
@@ -238,6 +291,24 @@ public class Controller {
         statChart.setCategoryGap(20);
     }
 
+    //-----  Initializes compare chart based on active mode  -----//
+    private void initCompareChart(List<Interval> intervals, List<String> p_headings){
+        switch (curCompareType) {
+            case lostTime:
+                initCompareLostChart(intervals, p_headings);
+                break;
+            case GPU:
+                initCompareGPUChart(intervals, p_headings);
+                break;
+        }
+    }
+
+    //-----  Initializes all compare charts  -----//
+    private void initAllCompareCharts(List<Interval> intervals, List<String> p_headings){
+        initCompareLostChart(intervals, p_headings);
+        initCompareGPUChart(intervals, p_headings);
+    }
+
     //-----  Initializes stacked bar chart for comparison selected interval  -----//
     private void initCompareLostChart(List<Interval> intervals, List<String> p_headings){
         XYChart.Series<String, Double> series1 = new XYChart.Series<>();
@@ -276,6 +347,36 @@ public class Controller {
             displayLabelForData(series4.getData().get(i));
         }
         statCompareChart.setCategoryGap(20);
+    }
+
+    //-----  Initializes line chart for GPU comparison selected interval  -----//
+    private void initCompareGPUChart(List<Interval> intervals, List<String> p_headings){
+        XYChart.Series<String, Double> seriesGPUProd = new XYChart.Series<>();
+        XYChart.Series<String, Double> seriesGPULost = new XYChart.Series<>();
+        XYChart.Series<String, Double> seriesExec = new XYChart.Series<>();
+        seriesGPUProd.setName("Продуктивное время на GPU");
+        seriesGPULost.setName("Потерянное время на GPU");
+        seriesExec.setName("Время выполнения");
+
+        //-----  Init series with GPU times data  -----//
+        for (int i = 0; i < intervals.size(); ++i){
+            String xname = "GPU Units: " + intervals.get(i).getGPUNum() + "\n"
+                    + p_headings.get(i) + "\n"
+                    + String.format("%.2f", intervals.get(i).info.times.exec_time) + "\n"
+                    + String.format("%.2f", intervals.get(i).info.times.efficiency) + "\n"
+                    + intervals.get(i).info.id.pname + " (" + i + ")";
+
+            seriesGPUProd.getData().add(new XYChart.Data<>(xname, intervals.get(i).info.times.gpu_time_prod));
+            seriesGPULost.getData().add(new XYChart.Data<>(xname, intervals.get(i).info.times.gpu_time_lost));
+            seriesExec.getData().add(new XYChart.Data<>(xname, intervals.get(i).info.times.exec_time));
+        }
+
+        statCompareGPUChart.getYAxis().setAutoRanging(intervals.get(0).info.id.nlev == 0);
+        statCompareGPUChart.getYAxis().setTickMarkVisible(true);
+        statCompareGPUChart.getYAxis().setTickLabelsVisible(true);
+
+        statCompareGPUChart.getData().clear();
+        statCompareGPUChart.getData().addAll(seriesGPUProd, seriesGPULost, seriesExec);
     }
 
     private void initStat(@org.jetbrains.annotations.NotNull Stat stat) throws Exception{
@@ -341,7 +442,7 @@ public class Controller {
             List<Interval> subIntervals = intervals.stream().map(elt -> elt.intervals.get(finalI)).collect(Collectors.toList());
             treeItem.getChildren().add(getRootWithChildren(subIntervals, pHeadings));
         }
-        treeItem.expandedProperty().addListener((observable, oldValue, newValue) -> addBlinkCompare(treeItem));
+        treeItem.expandedProperty().addListener((observable, oldValue, newValue) -> addBlink(treeItem));
         treeItem.setExpanded(true);
         return treeItem;
     }
@@ -349,17 +450,24 @@ public class Controller {
     private void initCompareIntervalTree(List<Stat> compareList) {
         //-----  Init tree  -----//
         lostCompareTime = Collections.max(compareList.stream().map(elt -> elt.interval.info.times.lost_time).collect(Collectors.toList()));
-        TreeItem<IntervalComparePane> root = getRootWithChildren(compareList.stream().map(elt -> elt.interval).collect(Collectors.toList()),
-                compareList.stream().map(elt -> elt.info.p_heading).collect(Collectors.toList()));
+        GPUCompareTime = Collections.max(compareList.stream()
+                .map(elt -> Math.max(Math.max(elt.interval.info.times.gpu_time_prod, elt.interval.info.times.gpu_time_lost),
+                        elt.interval.info.times.exec_time)
+        ).collect(Collectors.toList()));
+        List<Interval> intervals = compareList.stream().map(elt -> elt.interval).collect(Collectors.toList());
+        List<String> p_headings = compareList.stream().map(elt -> elt.info.p_heading).collect(Collectors.toList());
+        TreeItem<IntervalComparePane> root = getRootWithChildren(intervals, p_headings);
         statCompareTreeView.setRoot(root);
 
         statCompareTreeView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         statCompareTreeView.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) -> {
                     if (newValue != null)
-                        initCompareLostChart(newValue.getValue().getIntervals(), newValue.getValue().getPHeadings());
+                        initCompareChart(newValue.getValue().getIntervals(), newValue.getValue().getPHeadings());
                 });
         statCompareTreeView.getSelectionModel().select(0);
+        //-----  Init all charts to set max Y values  -----//
+        initAllCompareCharts(intervals, p_headings);
     }
 
     @FXML public void loadStat() throws Exception{
@@ -447,6 +555,7 @@ public class Controller {
         compareSplitPane.setDividerPositions(1);
         showCompareTreeButton.setSelected(false);
         setDisableCompare(true);
+        resetCompareTypeChoiceBox();
         selectTab(0);
     }
 
@@ -455,6 +564,7 @@ public class Controller {
         showCompareTreeButton.setDisable(disable);
         compareSplitPane.setDisable(disable);
         resetCompareStatButton.setDisable(disable);
+        compareTypeChoiceBox.setDisable(disable);
     }
 
     @FXML public void compareShowIntervals() {
@@ -512,7 +622,6 @@ public class Controller {
             errorDialog.showDialog();
             return;
         }
-        // TODO: delete stats
         List<StatRow> statRows = statTableView.getSelectionModel().getSelectedItems();
         for (StatRow statRow : statRows) {
             try {

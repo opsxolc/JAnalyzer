@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.chart.StackedBarChart?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
@@ -16,15 +19,11 @@
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.control.TreeView?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<!--<GridPane fx:controller="sample.Controller"-->
-<!--xmlns:fx="http://javafx.com/fxml" alignment="center" hgap="10" vgap="10">-->
-<!---->
-<!--</GridPane>-->
-
-<TabPane fx:id="tabPane" prefHeight="515.0" prefWidth="655.0" stylesheets="@bootstrap3.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
+<TabPane fx:id="tabPane" prefHeight="515.0" prefWidth="655.0" stylesheets="@bootstrap3.css" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
 <tabs>
     <Tab fx:id="loadStatsTab" closable="false" text="Загрузка статистик">
         <AnchorPane>
@@ -43,7 +42,7 @@
     </Tab>
     <Tab fx:id="showStatTab" closable="false" text="Единичная статистика">
         <AnchorPane prefHeight="436.0" prefWidth="655.0">
-            <SplitPane fx:id="statSplitPane" cacheShape="false" centerShape="false" dividerPositions="0.006125574272588055, 0.7044410413476263" focusTraversable="false" layoutY="47.0" scaleShape="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="47.0">
+            <SplitPane fx:id="statSplitPane" cacheShape="false" centerShape="false" dividerPositions="0.006125574272588055, 0.9938744257274119" focusTraversable="false" layoutY="47.0" scaleShape="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="47.0">
                 <items>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                         <children>
@@ -65,7 +64,7 @@
                         </ScrollPane>
                         </children>
                     </AnchorPane>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="208.0">
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="208.0" SplitPane.resizableWithParent="false">
                         <children>
                             <TreeView fx:id="statTreeView" minHeight="0.0" minWidth="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="17.0" />
                         <Label alignment="CENTER" layoutY="6.0" styleClass="column-header" text="Дерево интервалов" textAlignment="CENTER" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
@@ -86,7 +85,7 @@
          <content>
             <AnchorPane>
                <children>
-                  <SplitPane fx:id="compareSplitPane" dividerPositions="0.5991902834008097" prefHeight="475.0" prefWidth="496.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="159.0" AnchorPane.topAnchor="0.0">
+                  <SplitPane fx:id="compareSplitPane" dividerPositions="0.5991902834008097" layoutX="90.0" prefHeight="475.0" prefWidth="475.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="180.0" AnchorPane.topAnchor="0.0">
                     <items>
                         <AnchorPane>
                            <children>
@@ -94,7 +93,7 @@
                                  <content>
                                     <AnchorPane prefHeight="200.0" prefWidth="200.0">
                                        <children>
-                                          <StackedBarChart fx:id="statCompareChart" animated="false" layoutX="-91.0" layoutY="-69.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                          <StackedBarChart fx:id="statCompareChart" animated="false" layoutX="-91.0" layoutY="-69.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" title="Потерянное время" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <xAxis>
                                               <CategoryAxis side="BOTTOM" />
                                             </xAxis>
@@ -102,26 +101,40 @@
                                               <NumberAxis side="LEFT" />
                                             </yAxis>
                                           </StackedBarChart>
+                                          <LineChart fx:id="statCompareGPUChart" animated="false" layoutX="18.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="422.0" prefWidth="482.0" title="Сравнение GPU" visible="false" AnchorPane.bottomAnchor="17.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                            <xAxis>
+                                              <CategoryAxis side="BOTTOM" />
+                                            </xAxis>
+                                            <yAxis>
+                                              <NumberAxis side="LEFT" />
+                                            </yAxis>
+                                          </LineChart>
                                        </children>
                                     </AnchorPane>
                                  </content>
                               </ScrollPane>
                            </children></AnchorPane>
-                      <AnchorPane minHeight="0.0" minWidth="0.0">
+                      <AnchorPane minHeight="0.0" minWidth="0.0" SplitPane.resizableWithParent="false">
                            <children>
                               <TreeView fx:id="statCompareTreeView" layoutX="36.0" minHeight="0.0" minWidth="0.0" prefWidth="250.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="17.0" />
-                              <Label alignment="CENTER" layoutX="2.0" layoutY="6.0" styleClass="column-header" text="Дерево интервалов" textAlignment="CENTER" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                              <Label alignment="CENTER" layoutX="2.0" layoutY="6.0" styleClass="column-header" text="Дерево интервалов" textAlignment="CENTER" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <tooltip>
+                                    <Tooltip text="Some tooltip" wrapText="true" />
+                                 </tooltip></Label>
                            </children></AnchorPane>
                     </items>
                   </SplitPane>
-                  <Button fx:id="resetCompareStatButton" layoutX="514.0" layoutY="431.0" mnemonicParsing="false" onAction="#resetCompareStat" prefWidth="127.0" text="Сброс" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0" />
-                  <MenuButton fx:id="sortMenu" alignment="CENTER" contentDisplay="CENTER" layoutX="514.0" layoutY="14.0" mnemonicParsing="false" prefWidth="127.0" text="Сортировка" textAlignment="CENTER" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
+                  <Button fx:id="resetCompareStatButton" layoutX="492.0" layoutY="434.0" mnemonicParsing="false" onAction="#resetCompareStat" prefWidth="150.0" text="Сброс" AnchorPane.bottomAnchor="11.0" AnchorPane.rightAnchor="13.0" />
+                  <MenuButton fx:id="sortMenu" alignment="CENTER" contentDisplay="CENTER" layoutX="491.0" layoutY="77.0" mnemonicParsing="false" prefWidth="150.0" text="Сортировка" textAlignment="CENTER" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="77.0">
                     <items>
                       <MenuItem mnemonicParsing="false" text="Action 1" />
                       <MenuItem mnemonicParsing="false" text="Action 2" />
                     </items>
                   </MenuButton>
-                  <ToggleButton fx:id="showCompareTreeButton" layoutX="514.0" layoutY="52.0" mnemonicParsing="false" onAction="#compareShowIntervals" prefWidth="127.0" text="Поинтервально" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="52.0" />
+                  <ToggleButton fx:id="showCompareTreeButton" layoutX="491.0" layoutY="116.0" mnemonicParsing="false" onAction="#compareShowIntervals" prefWidth="150.0" text="Поинтервально" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="116.0" />
+                  <ChoiceBox fx:id="compareTypeChoiceBox" layoutX="491.0" layoutY="28.0" prefWidth="150.0" styleClass="menu-button" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="28.0" />
+                  <Label alignment="CENTER" contentDisplay="CENTER" layoutX="491.0" layoutY="6.0" prefHeight="17.0" prefWidth="150.0" text="Тип сравнения" textAlignment="CENTER" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="6.0" />
+                  <Separator layoutX="499.0" layoutY="61.0" prefHeight="13.0" prefWidth="135.0" AnchorPane.rightAnchor="21.0" AnchorPane.topAnchor="61.0" />
                </children>
             </AnchorPane>
          </content>
