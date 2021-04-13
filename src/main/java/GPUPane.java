@@ -1,13 +1,18 @@
 import javafx.geometry.HPos;
+import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import json.GPUMetricJson;
 import json.GPUTimesJson;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 
 //---  Названия метрик для отображения ГПУ  ---//
 enum DVMHStatMetrics{
@@ -41,8 +46,9 @@ enum DVMHStatMetrics{
     DVMH_STAT_METRIC_FORCE_INT
 };
 
-public class GPUPane extends GridPane {
+public class GPUPane extends VBox {
     private final Label titleLabel = new Label();
+    private final GridPane gridPane = new GridPane();
 
     public void setTitle(String title) {
         titleLabel.setText(title);
@@ -104,24 +110,42 @@ public class GPUPane extends GridPane {
 
     public GPUPane() {
         super();
-        add(titleLabel, 0, 0, 2, 1); // TODO: Style title and pane
-        add(new Label("#"), 1, 1);
-        add(new Label("min"), 2, 1);
-        add(new Label("max"), 3, 1);
-        add(new Label("Sum"), 4, 1);
-        add(new Label("Average"), 5, 1);
-        add(new Label("Productive"), 6, 1);
-        add(new Label("Lost"), 7, 1);
-        for (Node node: getChildren()) {
-            setHalignment(node, HPos.CENTER);
-            setValignment(node, VPos.CENTER);
-        }
+
+        gridPane.setHgap(20);
+        gridPane.setVgap(3);
+        gridPane.setPadding(new Insets(5, 10, 10, 10));
+        titleLabel.setPadding(new Insets(0, 0, 2, 10));
+        setMinSize(VBox.USE_PREF_SIZE, VBox.USE_PREF_SIZE);
+        setMaxSize(VBox.USE_PREF_SIZE, VBox.USE_PREF_SIZE);
+
+        //-----  Style  -----//
+        titleLabel.setStyle(
+                "-fx-font-size: 11;"
+        );
+        gridPane.setStyle(
+                "-fx-background-color: #f4f4f4;" +
+                "-fx-background-radius: 10;" +
+                "-fx-font-size: 11;"
+        );
+
+        //-----  Init labels  -----//
+        gridPane.add(new Label("#"), 1, 0);
+        gridPane.add(new Label("min"), 2, 0);
+        gridPane.add(new Label("max"), 3, 0);
+        gridPane.add(new Label("Sum"), 4, 0);
+        gridPane.add(new Label("Average"), 5, 0);
+        gridPane.add(new Label("Productive"), 6, 0);
+        gridPane.add(new Label("Lost"), 7, 0);
+
+        getChildren().add(titleLabel);
+        getChildren().add(gridPane);
     }
 
     public void Init(GPUTimesJson gpuTimes, int gpuNum){
-        String title = "GPU #" + gpuNum + "(" + gpuTimes.gpu_name + ")";
+        String title = "GPU #" + gpuNum + " (" + gpuTimes.gpu_name + ")";
         setTitle(title);
-        int rowNum = 2;
+        int rowNum = 1;
+        ArrayList<Label> metricLabels = new ArrayList<>();
         for (int i = 0; i < DVMHStatMetricCount; ++i)
         {
             GPUMetricJson metric = gpuTimes.metrics.get(i);
@@ -130,8 +154,11 @@ public class GPUPane extends GridPane {
             boolean isSize = i >= DVMHStatMetrics.DVMH_STAT_METRIC_CPY_DTOH.ordinal() &&
                 i <= DVMHStatMetrics.DVMH_STAT_METRIC_CPY_GET_ACTUAL.ordinal() ||
                 i == DVMHStatMetrics.DVMH_STAT_METRIC_UTIL_ARRAY_TRANSFORMATION.ordinal();
-            addRow(rowNum++,
-                    new Label(dvmhStatMetricsTitles[i]),
+            Label metricLabel = new Label(dvmhStatMetricsTitles[i]);
+            metricLabels.add(metricLabel);
+
+            gridPane.addRow(rowNum++,
+                    metricLabel,
                     new Label(String.valueOf(metric.countMeasures)),
                     new Label(prepareValue(metric.min, isSize, isSize, false, false)),
                     new Label(prepareValue(metric.max, isSize, isSize, false, false)),
@@ -141,10 +168,31 @@ public class GPUPane extends GridPane {
                     new Label(prepareValue(metric.timeLost, true, false, true, true))
                 );
         }
-        addRow(rowNum++, new Label("Productive time      "
-                + prepareValue(gpuTimes.prod_time, true, false, true, true)));
-        addRow(rowNum, new Label("Lost time                "
-                + prepareValue(gpuTimes.lost_time, true, false, true, true)));
-        System.out.println("GPUPane Init done");
+        for (Node node: gridPane.getChildren()) {
+            GridPane.setHalignment(node, HPos.RIGHT);
+            GridPane.setValignment(node, VPos.CENTER);
+        }
+        for (Node node: metricLabels) {
+            GridPane.setHalignment(node, HPos.LEFT);
+        }
+
+        //-----  Separator  -----//
+        Separator separator = new Separator();
+        separator.setOrientation(Orientation.HORIZONTAL);
+        gridPane.add(separator, 0, rowNum++, 8, 1);
+
+        //-----  Productive and Lost times  -----//
+        GridPane prodLostPane = new GridPane();
+        prodLostPane.setHgap(15);
+        prodLostPane.setVgap(3);
+
+        Label prodLabel = new Label(prepareValue(gpuTimes.prod_time, true, false, true, true));
+        Label lostLabel = new Label(prepareValue(gpuTimes.lost_time, true, false, true, true));
+        prodLostPane.addRow(0, new Label("Productive time"), prodLabel);
+        prodLostPane.addRow(1, new Label("Lost time"), lostLabel);
+        GridPane.setHalignment(prodLabel, HPos.RIGHT);
+        GridPane.setHalignment(lostLabel, HPos.RIGHT);
+
+        gridPane.add(prodLostPane, 0, rowNum, 2, 1);
     }
 }

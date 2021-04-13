@@ -30,16 +30,16 @@
     <Tab fx:id="loadStatsTab" closable="false" text="Загрузка статистик">
         <AnchorPane>
             <TextField fx:id="loadPath" layoutX="14.0" layoutY="7.0" prefHeight="27.0" prefWidth="529.0" promptText="Enter full path to sts.gz+ file" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="112.0" AnchorPane.topAnchor="9.0" />
-            <Button fx:id="saveStatButton" layoutX="505.0" layoutY="7.0" onAction="#saveStat" prefHeight="20.0" prefWidth="89.0" text="Сохранить" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="9.0" />
-            <TableView fx:id="statTableView" layoutX="14.0" layoutY="50.0" pickOnBounds="false" prefHeight="402.0" prefWidth="529.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="112.0" AnchorPane.topAnchor="45.0">
+            <Button fx:id="saveStatButton" layoutX="552.0" layoutY="10.0" onAction="#saveStat" prefHeight="20.0" prefWidth="89.0" text="Сохранить" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="10.0" />
+            <TableView fx:id="statTableView" layoutX="14.0" layoutY="50.0" pickOnBounds="false" prefHeight="402.0" prefWidth="529.0" style="-fx-border-radius: 5; -fx-background-color: transparent;" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="112.0" AnchorPane.topAnchor="45.0">
               <columns>
                 <TableColumn prefWidth="191.0" text="Статистика выполнения" />
                 <TableColumn minWidth="0.0" prefWidth="287.0" text="Дата загрузки" />
               </columns>
             </TableView>
             <Button fx:id="loadStatButton" layoutX="552.0" layoutY="45.0" onAction="#loadStat" prefWidth="89.0" text="Загрузить" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="45.0" />
-            <Button fx:id="compareButton" layoutX="552.0" layoutY="82.0" onAction="#compareStats" prefWidth="89.0" text="Сравнить" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="81.0" />
-            <Button fx:id="deleteButton" layoutX="552.0" layoutY="118.0" onAction="#deleteStat" prefWidth="89.0" text="Удалить" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="118.0" />
+            <Button fx:id="compareButton" layoutX="552.0" layoutY="80.0" onAction="#compareStats" prefWidth="89.0" text="Сравнить" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="80.0" />
+            <Button fx:id="deleteButton" layoutX="552.0" layoutY="115.0" onAction="#deleteStat" prefWidth="89.0" text="Удалить" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="115.0" />
         </AnchorPane>
     </Tab>
     <Tab fx:id="showStatTab" closable="false" text="Единичная статистика">
@@ -72,11 +72,14 @@
                               </AnchorPane>
                               <AnchorPane>
                                  <children>
-                                    <ScrollPane fitToHeight="true" fitToWidth="true" minHeight="0.0" minWidth="0.0" style="-fx-background-color: transparent;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <ScrollPane fx:id="GPUScrollPane" fitToHeight="true" fitToWidth="true" minHeight="0.0" minWidth="0.0" style="-fx-background-color: transparent;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                        <content>
                                         <AnchorPane style="-fx-border-width: 0;">
                                              <children>
-                                                <VBox fx:id="GPUVBox" layoutY="-9.0" prefHeight="161.0" prefWidth="340.0" style="-fx-background-color: white; -fx-border-width: 0;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                <VBox fx:id="GPUVBox" layoutY="-9.0" prefHeight="161.0" prefWidth="340.0" spacing="10.0" style="-fx-background-color: white; -fx-border-width: 0;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                   <padding>
+                                                      <Insets bottom="10.0" left="10.0" right="10.0" top="5.0" />
+                                                   </padding></VBox>
                                              </children>
                                           </AnchorPane>
                                        </content>
@@ -111,7 +114,7 @@
          <content>
             <AnchorPane>
                <children>
-                  <SplitPane fx:id="compareSplitPane" dividerPositions="0.5991902834008097" layoutX="90.0" prefHeight="475.0" prefWidth="475.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="180.0" AnchorPane.topAnchor="0.0">
+                  <SplitPane fx:id="compareSplitPane" dividerPositions="0.5991902834008097" layoutX="90.0" prefHeight="476.0" prefWidth="505.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="150.0" AnchorPane.topAnchor="0.0">
                     <items>
                         <AnchorPane>
                            <children>
@@ -150,17 +153,17 @@
                            </children></AnchorPane>
                     </items>
                   </SplitPane>
-                  <Button fx:id="resetCompareStatButton" layoutX="492.0" layoutY="434.0" mnemonicParsing="false" onAction="#resetCompareStat" prefWidth="150.0" text="Сброс" AnchorPane.bottomAnchor="11.0" AnchorPane.rightAnchor="13.0" />
-                  <MenuButton fx:id="sortMenu" alignment="CENTER" contentDisplay="CENTER" layoutX="491.0" layoutY="77.0" mnemonicParsing="false" prefWidth="150.0" text="Сортировка" textAlignment="CENTER" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="77.0">
+                  <Button fx:id="resetCompareStatButton" layoutX="492.0" layoutY="434.0" mnemonicParsing="false" onAction="#resetCompareStat" prefHeight="28.0" prefWidth="121.0" text="Сброс" AnchorPane.bottomAnchor="11.0" AnchorPane.rightAnchor="13.0" />
+                  <MenuButton fx:id="sortMenu" alignment="CENTER" contentDisplay="CENTER" layoutX="531.0" layoutY="68.0" mnemonicParsing="false" prefHeight="28.0" prefWidth="121.0" text="Сортировка" textAlignment="CENTER" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="68.0">
                     <items>
                       <MenuItem mnemonicParsing="false" text="Action 1" />
                       <MenuItem mnemonicParsing="false" text="Action 2" />
                     </items>
                   </MenuButton>
-                  <ToggleButton fx:id="showCompareTreeButton" layoutX="491.0" layoutY="116.0" mnemonicParsing="false" onAction="#compareShowIntervals" prefWidth="150.0" text="Поинтервально" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="116.0" />
-                  <ChoiceBox fx:id="compareTypeChoiceBox" layoutX="491.0" layoutY="28.0" prefWidth="150.0" styleClass="menu-button" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="28.0" />
-                  <Label alignment="CENTER" contentDisplay="CENTER" layoutX="491.0" layoutY="6.0" prefHeight="17.0" prefWidth="150.0" text="Тип сравнения" textAlignment="CENTER" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="6.0" />
-                  <Separator layoutX="499.0" layoutY="61.0" prefHeight="13.0" prefWidth="135.0" AnchorPane.rightAnchor="21.0" AnchorPane.topAnchor="61.0" />
+                  <ToggleButton fx:id="showCompareTreeButton" layoutX="531.0" layoutY="100.0" mnemonicParsing="false" onAction="#compareShowIntervals" prefHeight="28.0" prefWidth="121.0" text="Поинтервально" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="100.0" />
+                  <ChoiceBox fx:id="compareTypeChoiceBox" layoutX="491.0" layoutY="28.0" prefHeight="26.0" prefWidth="121.0" styleClass="menu-button" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="28.0" />
+                  <Label alignment="CENTER" contentDisplay="CENTER" layoutX="491.0" layoutY="6.0" prefHeight="17.0" prefWidth="121.0" text="Тип сравнения" textAlignment="CENTER" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="6.0" />
+                  <Separator layoutX="534.0" layoutY="54.0" prefHeight="13.0" prefWidth="94.0" AnchorPane.rightAnchor="27.0" AnchorPane.topAnchor="54.0" />
                </children>
             </AnchorPane>
          </content>

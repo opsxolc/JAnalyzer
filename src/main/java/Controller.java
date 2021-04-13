@@ -1,3 +1,4 @@
+import com.sun.javafx.scene.control.skin.ScrollPaneSkin;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -11,11 +12,13 @@ import javafx.scene.chart.StackedBarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
+import json.GPUTimesJson;
 import json.IntervalJson;
 import json.ProcTimesJson;
 import org.apache.commons.io.FileUtils;
@@ -56,11 +59,14 @@ public class Controller {
     @FXML private Button resetCompareStatButton;
     @FXML private VBox GPUVBox;
     @FXML private SplitPane GPUSplitPane;
+    @FXML private ScrollPane GPUScrollPane;
 
     enum CompareType {
         lostTime,
         GPU
     }
+
+    Pattern pData = Pattern.compile("data.");
 
     private double lostTime = 0;
     private double lostCompareTime = 0;
@@ -68,6 +74,7 @@ public class Controller {
     private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
     public static ArrayList<Stat> compareList = new ArrayList<>();
     public CompareType curCompareType = CompareType.lostTime;
+    public Integer curProc = -1;
 
     private static final String numProcSort = "Кол-во процессоров", lostTimeSort = "Потерянное время",
             execTimeSort = "Время выполнения", coefSort = "Коэф. эффективности";
@@ -110,10 +117,6 @@ public class Controller {
                     switchCompareType(CompareType.GPU);
             }
         });
-    }
-
-    private void resetCompareTypeChoiceBox() {
-        compareTypeChoiceBox.getSelectionModel().select(0);
     }
 
     private void switchCompareType(CompareType cType){
@@ -249,11 +252,76 @@ public class Controller {
         return treeItem;
     }
 
-
+    //-----  Displays Labels for Data in Chart  -----//
     private void displayLabelForData(XYChart.Data<String, Double> data) {
         StackPane bar = (StackPane) data.getNode();
-        final Text dataText = new Text(String.format("%.2f", data.getYValue()));
+        Text dataText = new Text(String.format("%.2f", data.getYValue()));
+        dataText.setMouseTransparent(true);
+        dataText.setPickOnBounds(false);
         bar.getChildren().add(dataText);
+    }
+
+    private void addGPUCards(List<GPUTimesJson> GPUs) {
+        for (int i = 0; i < GPUs.size(); i++) {
+            GPUPane gpuCard = new GPUPane();
+            gpuCard.Init(GPUs.get(i), i + 1);
+            GPUVBox.getChildren().add(gpuCard);
+        }
+    }
+
+    //-----  Find data number from css list  -----//
+    private Integer findDataNum(List<String> list){
+        // TODO: find also for axes
+        for(String s: list){
+            if (pData.matcher(s).matches()) {
+                return Integer.decode(s.replaceAll("[^0-9]", ""));
+            }
+        }
+        return null;
+    }
+
+    //-----  Select Processor from Stat  -----//
+    private void selectProc(int procNum){
+        Interval interval = getSelectedIntervalStat();
+        if (procNum < 0 || interval == null
+                || interval.info.proc_times.get(procNum).gpu_times == null
+                || interval.info.proc_times.get(procNum).gpu_times.size() == 0) {
+            resetProc(false, false);
+            return;
+        }
+
+        resetProc(false, true);
+
+        //-----  Set Divider Position  -----//
+        if (GPUSplitPane.getDividerPositions()[0] > 0.98)
+            GPUSplitPane.setDividerPosition(0, 0.66);
+
+        //-----  Adjust chart style  -----//
+        HashSet<Node> data = new HashSet<>(statChart.lookupAll(".chart-bar"));
+        String dataName = ".data" + procNum;
+        data.removeAll(statChart.lookupAll(dataName));
+        for(Node n: data) {
+            if (n.getStyleClass().contains("default-color0")) {
+                n.setStyle("-fx-background-color: #f8e7e8;");
+            }
+            if (n.getStyleClass().contains("default-color1")) {
+                n.setStyle("-fx-background-color: #d9a1d8;");
+            }
+            if (n.getStyleClass().contains("default-color2")) {
+                n.setStyle("-fx-background-color: #c1dff6;");
+            }
+            if (n.getStyleClass().contains("default-color3")) {
+                n.setStyle("-fx-background-color: #d5f5aa;");
+            }
+        }
+
+        //-----  Adjust Scroll  -----//
+//        GPUScrollPane.setVvalue(0);
+
+        //-----  Add GPU cards  -----//
+        addGPUCards(interval.info.proc_times.get(procNum).gpu_times);
+
+        curProc = procNum;
     }
 
     //-----  Initializes stacked bar chart for selected interval  -----//
@@ -277,7 +345,6 @@ public class Controller {
             series4.getData().add(new XYChart.Data<>(Integer.toString(i + 1), procTimes.get(i).comm));
         }
 
-
         statChart.getYAxis().setAutoRanging(interval.info.id.nlev == 0);
         statChart.getYAxis().setTickMarkVisible(true);
         statChart.getYAxis().setTickLabelsVisible(true);
@@ -293,6 +360,20 @@ public class Controller {
             displayLabelForData(series4.getData().get(i));
         }
         statChart.setCategoryGap(20);
+
+        statChart.setOnMouseClicked(mouseEvent -> {
+            if(mouseEvent.getButton().equals(MouseButton.PRIMARY)){
+                if(mouseEvent.getClickCount() == 2){
+                    Node node = mouseEvent.getPickResult().getIntersectedNode();
+                    Integer dataNum = findDataNum(node.getStyleClass());
+                    if (dataNum == null) {
+                        resetProc(true, true);
+                        return;
+                    }
+                    selectProc(dataNum);
+                }
+            }
+        });
     }
 
     //-----  Initializes compare chart based on active mode  -----//
@@ -384,6 +465,8 @@ public class Controller {
     }
 
     private void initStat(@org.jetbrains.annotations.NotNull Stat stat) throws Exception{
+        resetProc(true, true);
+
         statLabel.setText(stat.getHeader());
 
         //-----  Init tree  -----//
@@ -394,17 +477,11 @@ public class Controller {
         statTreeView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         statTreeView.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) -> {
-                    if (newValue != null)
+                    if (newValue != null) {
                         initStatChart(newValue.getValue().getInterval());
+                        selectProc(curProc);
+                    }
         });
-
-//        try {
-//            GPUPane gpuCard = new GPUPane();
-//            gpuCard.Init(stat.interval.info.proc_times.get(0).gpu_times.get(0), 1);
-//            GPUVBox.getChildren().add(gpuCard);
-//        } catch (Exception e) {
-//            System.out.println("Error: " + e.toString());
-//        }
 
         //-----  Adjust style  -----//
         statTreeView.getSelectionModel().select(0);
@@ -484,6 +561,16 @@ public class Controller {
         initAllCompareCharts(intervals, p_headings);
     }
 
+    //-----  Get current selected Interval for loaded Stat  -----//
+    public Interval getSelectedIntervalStat(){
+        List<TreeItem<IntervalPane>> selectedItems =
+                statTreeView.getSelectionModel().getSelectedItems();
+        if (selectedItems.size() == 1)
+                return selectedItems.get(0).getValue().getInterval();
+        return null;
+    }
+
+    //-----  Analyze chosen stat  -----//
     @FXML public void loadStat() throws Exception{
         int size = statTableView.getSelectionModel().getSelectedItems().size();
         if (size != 1){
@@ -491,13 +578,12 @@ public class Controller {
             errorDialog.showDialog();
             return;
         }
-        StatRow statRow = (StatRow) statTableView.getSelectionModel().getSelectedItem();
-        initStat(statRow.getStat());
+        initStat(statTableView.getSelectionModel().getSelectedItem().getStat());
         setDisableLoadedStat(false);
         selectTab(1);
     }
 
-    // Добавить статистику в StatTableView
+    //-----  Add Stat to StatTableView  -----//
     private void AddStatToList(Stat stat, String creationTime)
     {
         statTableView.getItems().add(new StatRow(stat.getHeader(), creationTime, stat));
@@ -548,24 +634,36 @@ public class Controller {
         selectTab(2);
     }
 
+    //------------  RESET SECTION  ------------//
+
+    private void resetCompareTypeChoiceBox() {
+        compareTypeChoiceBox.getSelectionModel().select(0);
+    }
+
+    //-----  Reset selection of Processor  -----//
+    private void resetProc(boolean resetDivider, boolean resetCurProc){
+        if (resetCurProc)
+            curProc = -1;
+        for(Node n: statChart.lookupAll(".chart-bar"))
+            n.setStyle(null);
+        GPUVBox.getChildren().clear();
+        if (resetDivider)
+            GPUSplitPane.setDividerPositions(1);
+    }
+
     @FXML public void resetLoadedStat() {
         SplitPane.setResizableWithParent(statSplitPane.getItems().get(0), false);
         SplitPane.setResizableWithParent(statSplitPane.getItems().get(1), true);
         SplitPane.setResizableWithParent(statSplitPane.getItems().get(2), false);
         SplitPane.setResizableWithParent(GPUSplitPane.getItems().get(1), false);
+        resetProc(true, true);
         statLabel.setText("");
         statIntervalText.setText("");
         statChart.getData().clear();
         statTreeView.setRoot(null);
         statSplitPane.setDividerPositions(0, 1);
-        GPUSplitPane.setDividerPositions(1); // TODO: move to resetGPU()
         setDisableLoadedStat(true);
         selectTab(0);
-    }
-
-    private void setDisableLoadedStat(boolean disable) {
-        resetStatButton.setDisable(disable);
-        statSplitPane.setDisable(disable);
     }
 
     @FXML public void resetCompareStat() {
@@ -578,6 +676,15 @@ public class Controller {
         selectTab(0);
     }
 
+    //------------   RESET SECTION END   ------------//
+
+    //------------    DISABLE SECTION    ------------//
+
+    private void setDisableLoadedStat(boolean disable) {
+        resetStatButton.setDisable(disable);
+        statSplitPane.setDisable(disable);
+    }
+
     private void setDisableCompare(boolean disable) {
         sortMenu.setDisable(disable);
         showCompareTreeButton.setDisable(disable);
@@ -585,6 +692,8 @@ public class Controller {
         resetCompareStatButton.setDisable(disable);
         compareTypeChoiceBox.setDisable(disable);
     }
+
+    //------------  DISABLE SECTION END  ------------//
 
     @FXML public void compareShowIntervals() {
         if (showCompareTreeButton.isSelected()) {
