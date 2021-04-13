@@ -5,6 +5,7 @@ import javafx.animation.Timeline;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.StackedBarChart;
 import javafx.scene.chart.XYChart;
@@ -12,6 +13,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import json.IntervalJson;
@@ -52,6 +54,8 @@ public class Controller {
     @FXML private ToggleButton showCompareTreeButton;
     @FXML private Button resetStatButton;
     @FXML private Button resetCompareStatButton;
+    @FXML private VBox GPUVBox;
+    @FXML private SplitPane GPUSplitPane;
 
     enum CompareType {
         lostTime,
@@ -394,9 +398,19 @@ public class Controller {
                         initStatChart(newValue.getValue().getInterval());
         });
 
+//        try {
+//            GPUPane gpuCard = new GPUPane();
+//            gpuCard.Init(stat.interval.info.proc_times.get(0).gpu_times.get(0), 1);
+//            GPUVBox.getChildren().add(gpuCard);
+//        } catch (Exception e) {
+//            System.out.println("Error: " + e.toString());
+//        }
+
+        //-----  Adjust style  -----//
         statTreeView.getSelectionModel().select(0);
         statSplitPane.setDividerPositions(statChart.getWidth() / statSplitPane.getWidth(), 1);
-
+        SplitPane.setResizableWithParent(statSplitPane.getItems().get(0), true);
+        SplitPane.setResizableWithParent(statSplitPane.getItems().get(1), true);
     }
 
     private void updateCompareRoot(TreeItem<IntervalComparePane> item,
@@ -535,11 +549,16 @@ public class Controller {
     }
 
     @FXML public void resetLoadedStat() {
+        SplitPane.setResizableWithParent(statSplitPane.getItems().get(0), false);
+        SplitPane.setResizableWithParent(statSplitPane.getItems().get(1), true);
+        SplitPane.setResizableWithParent(statSplitPane.getItems().get(2), false);
+        SplitPane.setResizableWithParent(GPUSplitPane.getItems().get(1), false);
         statLabel.setText("");
         statIntervalText.setText("");
         statChart.getData().clear();
         statTreeView.setRoot(null);
         statSplitPane.setDividerPositions(0, 1);
+        GPUSplitPane.setDividerPositions(1); // TODO: move to resetGPU()
         setDisableLoadedStat(true);
         selectTab(0);
     }
@@ -592,6 +611,7 @@ public class Controller {
         System.out.println(tmpFileLocDir);
         //---  Save files  ---//
         String tmpDirPath = Main.StatDirPath + stat.hashCode();
+        stat.dir = tmpDirPath;
         Files.createDirectory(Paths.get(tmpDirPath));
         LocalDateTime creationTime = LocalDateTime.now();
         FileWriter writer = new FileWriter(tmpDirPath + "/stat.json");

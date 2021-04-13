@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" stylesheets="@bootstrap3.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="StatCompareTreeItem1Controller">
+<AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" xmlns:fx="http://javafx.com/fxml/1" fx:controller="StatCompareTreeItem1Controller">
    <children>
       <Label layoutX="22.0" text="Max " AnchorPane.bottomAnchor="17.0" AnchorPane.leftAnchor="22.0" AnchorPane.topAnchor="0.0" />
       <Label layoutX="22.0" layoutY="17.0" text="Min" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="22.0" AnchorPane.topAnchor="17.0" />

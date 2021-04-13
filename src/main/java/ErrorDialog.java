@@ -23,6 +23,7 @@ public class ErrorDialog {
         errorController.setMessage(message);
         Scene scene = new Scene(p);
         stage = new Stage();
+        scene.getStylesheets().add("bootstrap3.css");
         stage.setScene(scene);
         stage.getIcons().add(new Image("/icon.png"));
         stage.setTitle("Ошибка");
