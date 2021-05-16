@@ -2,6 +2,7 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -62,7 +63,8 @@ public class Controller {
     @FXML private SplitPane GPUSplitPane;
     @FXML private ScrollPane GPUScrollPane;
     @FXML private ToggleButton procAnalysisButton;
-    @FXML private TreeTableView<Characteristic> statAnalysisTable;
+    @FXML private TreeView<CharacteristicPane> statAnalysisView;
+    @FXML private Label characteristicLabel;
 
     enum CompareType {
         lostTime,
@@ -157,19 +159,10 @@ public class Controller {
     }
 
     private void initStatAnalysisTable(){
-        statAnalysisTable.setShowRoot(false);
-        TreeTableColumn<Characteristic, String> characteristicCol = new TreeTableColumn<>("Характеристика"),
-            valueCol = new TreeTableColumn<>("Значение");
+        statAnalysisView.setShowRoot(false);
 
-        characteristicCol.setPrefWidth(120);
-        valueCol.setPrefWidth(120);
-
-        characteristicCol.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
-        valueCol.setCellValueFactory(new TreeItemPropertyValueFactory<>("stringVal"));
-
-        statAnalysisTable.getColumns().addAll(characteristicCol, valueCol);
-        TreeItem<Characteristic> root = new TreeItem<>(new Characteristic("root", "root"));
-        statAnalysisTable.setRoot(root);
+        TreeItem<CharacteristicPane> root = new TreeItem<>(new CharacteristicPane("root", "root"));
+        statAnalysisView.setRoot(root);
     }
 
     //-----  INIT SECTION END  -----//
@@ -250,11 +243,11 @@ public class Controller {
     private void addBlink(TreeItem treeItem) {
         new Timeline(
                 new KeyFrame(Duration.seconds(0),
-                        new KeyValue(((AnchorPane)treeItem.getValue()).opacityProperty(), 1.0)),
+                        new KeyValue(((Node)treeItem.getValue()).opacityProperty(), 1.0)),
                 new KeyFrame(Duration.seconds(0.3),
-                        new KeyValue(((AnchorPane)treeItem.getValue()).opacityProperty(), 0.3, Interpolator.EASE_OUT)),
+                        new KeyValue(((Node)treeItem.getValue()).opacityProperty(), 0.3, Interpolator.EASE_OUT)),
                 new KeyFrame(Duration.seconds(0.7),
-                        new KeyValue(((AnchorPane)treeItem.getValue()).opacityProperty(), 1.0, Interpolator.EASE_OUT))
+                        new KeyValue(((Node)treeItem.getValue()).opacityProperty(), 1.0, Interpolator.EASE_OUT))
         ).play();
         for (Object item : treeItem.getChildren()) {
             addBlink((TreeItem) item);
@@ -538,11 +531,13 @@ public class Controller {
     }
 
     private void showAnalysis(){
-        statAnalysisTable.setVisible(true);
+        characteristicLabel.setVisible(true);
+        statAnalysisView.setVisible(true);
     }
 
     private void hideAnalysis(){
-        statAnalysisTable.setVisible(false);
+        characteristicLabel.setVisible(false);
+        statAnalysisView.setVisible(false);
     }
 
     private void showProcAnalysis(){
@@ -563,22 +558,35 @@ public class Controller {
         initAnalysis(inter);
     }
 
-    private void initAnalysis(Interval inter){
-        Characteristic efficiency = new Characteristic("Parallelization efficiency", inter.info.times.efficiency),
-            execTime = new Characteristic("Execution time", inter.info.times.exec_time),
-            processors = new Characteristic("Processors", inter.info.times.nproc),
-            threads = new Characteristic("Threads amount", inter.info.times.threadsOfAllProcs),
-            totalTime = new Characteristic("Total time", inter.info.times.sys_time),
-            prodTime = new Characteristic("Productive time", inter.info.times.prod),
-            lostTime = new Characteristic("Lost time", inter.info.times.lost_time),
-                insufParallelism = new Characteristic("Insufficient parallelism", inter.info.times.insuf),
-                    insufParallelismSys = new Characteristic("Sys", inter.info.times.insuf_sys),
-                    insufParallelismUser = new Characteristic("User", inter.info.times.insuf_user),
-                comm = new Characteristic("Communication", inter.info.times.comm),
-                idleTime = new Characteristic("Idle time", inter.info.times.idle),
-            loadImbalance = new Characteristic("Load imbalance", inter.info.times.load_imb);
+    private double getMaxWidth(List<TreeItem<CharacteristicPane>> list, int level, double max){
+        for (TreeItem<CharacteristicPane> item: list) {
+            double width = item.getValue().getBoundsInParent().getWidth();
+            if (18 * level + width > max) {
+                max = 18 * level + width;
+            }
+            double newMax = getMaxWidth(item.getChildren(), level + 1, max);
+            if (newMax > max)
+                max = newMax;
+        }
+        return max;
+    }
 
-        TreeItem<Characteristic> efficiencyItem = new TreeItem<>(efficiency),
+    private void initAnalysis(Interval inter){
+        CharacteristicPane efficiency = new CharacteristicPane("Parallelization efficiency", inter.info.times.efficiency),
+            execTime = new CharacteristicPane("Execution time", inter.info.times.exec_time),
+            processors = new CharacteristicPane("Processors", inter.info.times.nproc),
+            threads = new CharacteristicPane("Threads amount", inter.info.times.threadsOfAllProcs),
+            totalTime = new CharacteristicPane("Total time", inter.info.times.sys_time),
+            prodTime = new CharacteristicPane("Productive time", inter.info.times.prod),
+            lostTime = new CharacteristicPane("Lost time", inter.info.times.lost_time),
+                insufParallelism = new CharacteristicPane("Insufficient parallelism", inter.info.times.insuf),
+                    insufParallelismSys = new CharacteristicPane("Sys", inter.info.times.insuf_sys),
+                    insufParallelismUser = new CharacteristicPane("User", inter.info.times.insuf_user),
+                comm = new CharacteristicPane("Communication", inter.info.times.comm),
+                idleTime = new CharacteristicPane("Idle time", inter.info.times.idle),
+            loadImbalance = new CharacteristicPane("Load imbalance", inter.info.times.load_imb);
+
+        TreeItem<CharacteristicPane> efficiencyItem = new TreeItem<>(efficiency),
                 execTimeItem = new TreeItem<>(execTime),
                 processorsItem = new TreeItem<>(processors),
                 threadsItem = new TreeItem<>(threads),
@@ -592,14 +600,24 @@ public class Controller {
                     idleTimeItem = new TreeItem<>(idleTime),
                 loadImbalanceItem = new TreeItem<>(loadImbalance);
 
+        commItem.getValue().getStyleClass().add("comm");
+        insufParallelismItem.getValue().getStyleClass().add("insuf");
+        insufParallelismSysItem.getValue().getStyleClass().add("insuf-sys");
+        insufParallelismUserItem.getValue().getStyleClass().add("insuf-user");
+        idleTimeItem.getValue().getStyleClass().add("idle");
+
         insufParallelismItem.getChildren().addAll(insufParallelismSysItem, insufParallelismUserItem);
         lostTimeItem.getChildren().addAll(insufParallelismItem, commItem, idleTimeItem);
 
-        statAnalysisTable.getRoot().getChildren().clear();
-        statAnalysisTable.getRoot().getChildren().addAll(efficiencyItem, execTimeItem, processorsItem,
+        statAnalysisView.getRoot().getChildren().clear();
+        statAnalysisView.getRoot().getChildren().addAll(efficiencyItem, execTimeItem, processorsItem,
                 threadsItem, totalTimeItem, prodTimeItem, lostTimeItem, loadImbalanceItem);
 
-//        addBlink(statAnalysisTable.getRoot());
+//        System.out.println();
+
+
+        insufParallelismItem.expandedProperty().addListener((observable, oldValue, newValue) -> addBlink(insufParallelismItem));
+        lostTimeItem.expandedProperty().addListener((observable, oldValue, newValue) -> addBlink(lostTimeItem));
     }
 
     //-----  Analysis END  -----//
@@ -621,6 +639,8 @@ public class Controller {
                         if (procAnalysisButton.isSelected()) {
                             initStatChart(newValue.getValue().getInterval());
                             selectProc(curProc);
+                        } else {
+                            initAnalysis(newValue.getValue().getInterval());
                         }
                     }
         });

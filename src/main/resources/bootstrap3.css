@@ -1009,3 +1009,23 @@ VBox > .split-menu-button.last > .arrow-button {
     -fx-pref-height: 0;
     -fx-min-height: 0;
 }
+
+.comm {
+    -fx-background-color: #adff2f40;
+}
+
+.insuf {
+    -fx-background-color: linear-gradient(to right, #ffc0cb40, #d971d640);
+}
+
+.insuf-sys {
+    -fx-background-color: #ffc0cb40;
+}
+
+.insuf-user {
+     -fx-background-color: #d971d640;
+}
+
+.idle {
+      -fx-background-color: #87cef940;
+}
