@@ -1,0 +1,10 @@
+/*.progress-bar { -fx-box-border: goldenrod; }*/
+
+.idle-max  { -fx-accent: green;  }
+.idle-mid { -fx-accent: yellow; }
+.idle-min { -fx-accent: orange; }
+
+
+.comm-max    { -fx-accent: red;    }
+.comm-mid    { -fx-accent: red;    }
+.comm-min    { -fx-accent: red;    }

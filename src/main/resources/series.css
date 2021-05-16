@@ -41,16 +41,3 @@
 .default-color3.chart-bar {
     -fx-background-color: #adff2f;
 }
-
-.default-color0.chart-line-symbol {
-    -fx-background-color: #ffc0cb;
-}
-.default-color1.chart-line-symbol {
-    -fx-background-color: #d971d6;
-}
-.default-color2.chart-line-symbol {
-    -fx-background-color: #87cef9;
-}
-.default-color3.chart-line-symbol {
-    -fx-background-color: #adff2f;
-}

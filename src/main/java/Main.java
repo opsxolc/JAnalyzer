@@ -29,8 +29,9 @@ public class Main extends Application {
         Scene scene = new Scene(p, 700, 600);
         scene.getStylesheets().add("series.css");
         scene.getStylesheets().add("bootstrap3.css");
+        scene.getStylesheets().add("progressBar.css");
         primaryStage.setScene(scene);
-        primaryStage.getIcons().add(new Image("/icon.png"));
+//        primaryStage.getIcons().add(new Image("/icon.png"));
         ((Controller)loader.getController()).initController();
         primaryStage.show();
     }

@@ -21,6 +21,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.control.TreeTableView?>
 <?import javafx.scene.control.TreeView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
@@ -30,16 +31,16 @@
     <Tab fx:id="loadStatsTab" closable="false" text="Загрузка статистик">
         <AnchorPane>
             <TextField fx:id="loadPath" layoutX="14.0" layoutY="7.0" prefHeight="27.0" prefWidth="529.0" promptText="Enter full path to sts.gz+ file" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="112.0" AnchorPane.topAnchor="9.0" />
-            <Button fx:id="saveStatButton" layoutX="552.0" layoutY="10.0" onAction="#saveStat" prefHeight="20.0" prefWidth="89.0" text="Сохранить" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="10.0" />
+            <Button fx:id="saveStatButton" layoutX="552.0" layoutY="10.0" onAction="#saveStat" prefHeight="20.0" prefWidth="89.0" text="Импорт" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="10.0" />
             <TableView fx:id="statTableView" layoutX="14.0" layoutY="50.0" pickOnBounds="false" prefHeight="402.0" prefWidth="529.0" style="-fx-border-radius: 5; -fx-background-color: transparent;" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="112.0" AnchorPane.topAnchor="45.0">
               <columns>
                 <TableColumn prefWidth="191.0" text="Статистика выполнения" />
                 <TableColumn minWidth="0.0" prefWidth="287.0" text="Дата загрузки" />
               </columns>
             </TableView>
-            <Button fx:id="loadStatButton" layoutX="552.0" layoutY="45.0" onAction="#loadStat" prefWidth="89.0" text="Загрузить" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="45.0" />
+            <Button fx:id="loadStatButton" layoutX="552.0" layoutY="45.0" onAction="#loadStat" prefWidth="89.0" text="Анализ" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="45.0" />
             <Button fx:id="compareButton" layoutX="552.0" layoutY="80.0" onAction="#compareStats" prefWidth="89.0" text="Сравнить" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="80.0" />
-            <Button fx:id="deleteButton" layoutX="552.0" layoutY="115.0" onAction="#deleteStat" prefWidth="89.0" text="Удалить" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="115.0" />
+            <Button fx:id="deleteButton" layoutX="552.0" layoutY="115.0" onAction="#deleteStat" prefWidth="89.0" text="Удалить" visible="false" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="115.0" />
         </AnchorPane>
     </Tab>
     <Tab fx:id="showStatTab" closable="false" text="Единичная статистика">
@@ -48,7 +49,7 @@
                 <items>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                         <children>
-                        <SplitPane fx:id="GPUSplitPane" dividerPositions="0.6670520231213873" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" style="-fx-background-color: transparent;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <SplitPane fx:id="GPUSplitPane" dividerPositions="0.6670520231213873" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" style="-fx-background-color: transparent;" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                           <items>
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                                  <children>
@@ -91,6 +92,7 @@
                               <Insets />
                            </opaqueInsets>
                         </SplitPane>
+                        <TreeTableView fx:id="statAnalysisTable" prefHeight="427.0" prefWidth="351.0" style="-fx-border-color: transparent;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                         </children>
                     </AnchorPane>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="208.0" SplitPane.resizableWithParent="false">
@@ -108,6 +110,7 @@
             </SplitPane>
             <Label fx:id="statLabel" layoutX="14.0" layoutY="14.0" prefHeight="17.0" prefWidth="410.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="231.0" AnchorPane.topAnchor="14.0" />
             <Button fx:id="resetStatButton" layoutX="562.0" layoutY="8.0" mnemonicParsing="false" onAction="#resetLoadedStat" prefHeight="4.0" prefWidth="79.0" text="Сброс" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="8.0" />
+            <ToggleButton fx:id="procAnalysisButton" layoutX="440.0" layoutY="9.0" mnemonicParsing="false" onAction="#procAnalysis" text="Попроцессорно" AnchorPane.rightAnchor="102.5" AnchorPane.topAnchor="9.0" />
         </AnchorPane>
     </Tab>
     <Tab fx:id="compareStatsTab" closable="false" text="Сравнение статистик">

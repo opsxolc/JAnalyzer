@@ -91,7 +91,7 @@ public class Stat implements Cloneable, Comparable<Stat>{
         }
         int i = 0;
         for (Interval inter : statIntervals) {
-            if (inter.info.id.t == intervals.get(i).info.id.t &&
+            if (i < intervals.size() && inter.info.id.t == intervals.get(i).info.id.t &&
                     inter.info.id.expr == intervals.get(i).info.id.expr) {
                 // нашли очередной интервал из intervals
                 // обрезаем его в рекурсивном вызове

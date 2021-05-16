@@ -938,7 +938,6 @@ VBox > .split-menu-button.last > .arrow-button {
 
 .tree-cell:odd {
     -fx-background-color: #f7f6f7;
-
 }
 
 .tree-cell:even {
@@ -947,7 +946,6 @@ VBox > .split-menu-button.last > .arrow-button {
 
 .tree-cell:focused {
     -fx-background-color: #cdc2e9;
-
 }
 
 .tree-cell {
@@ -970,6 +968,32 @@ VBox > .split-menu-button.last > .arrow-button {
     -fx-background-insets: 0;
 }
 
+.tree-table-view {
+    -fx-background-color: transparent;
+}
+
+.tree-table-row-cell:odd {
+    -fx-background-color: #f7f6f7;
+}
+
+.tree-table-row-cell:even {
+    -fx-background-color: white;
+}
+
+.tree-table-cell {
+    -fx-padding: 0px;
+}
+
+.tree-table-view:focused {
+    -fx-background-color: transparent;
+}
+
+.tree-table-row-cell:selected {
+    -fx-background-color: #cdc2e9;
+    -fx-table-cell-border-color: #9986c1;
+    -fx-background-insets: 0;
+}
+
 .separator *.line {
     -fx-border-color: #cccccc;
     -fx-border-style: solid;
@@ -978,4 +1002,10 @@ VBox > .split-menu-button.last > .arrow-button {
 
 .split-pane .scroll-pane .scroll-pane:focused {
     -fx-background-color: transparent;
+}
+
+.noheader .column-header-background {
+    -fx-max-height: 0;
+    -fx-pref-height: 0;
+    -fx-min-height: 0;
 }

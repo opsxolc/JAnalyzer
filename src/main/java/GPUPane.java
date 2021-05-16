@@ -81,7 +81,7 @@ public class GPUPane extends VBox {
         "Page lock host memory"
     };
 
-    NumberFormat f4 = new DecimalFormat("#0.0000");
+    NumberFormat f4 = new DecimalFormat("#0.####");
 
     private String prepareValue(double value, boolean isPositive, boolean isSize,
                                 boolean dashOnZero, boolean isTime)
@@ -94,13 +94,13 @@ public class GPUPane extends VBox {
         {
             if (value - 0.001 < 0) return "⏤";
             if (value >= ((long)1 << 30))
-                return value / ((long)1 << 30) +"G";
+                return f4.format(value / ((long)1 << 30)) +"G";
             if (value >= ((long)1 << 20))
-                return value / ((long)1 << 20) +"M";
+                return f4.format(value / ((long)1 << 20)) +"M";
             if (value >= ((long)1 << 10))
-                return value / ((long)1 << 10) +"K";
+                return f4.format(value / ((long)1 << 10)) +"K";
             if (value >= 0)
-                return value + "B";
+                return f4.format(value) + "B";
             return "?";
         }
         if (isTime)
