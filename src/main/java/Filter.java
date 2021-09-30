@@ -2,10 +2,10 @@ import java.util.function.Predicate;
 
 public class Filter {
 
-    static public void refresh(Interval interval){
+    static public void reset(Interval interval){
         interval.setVisible(true);
         for (Interval inter : interval.intervals){
-            refresh(inter);
+            reset(inter);
         }
     }
 
@@ -19,7 +19,7 @@ public class Filter {
     static public void filterUndo(Interval interval, Predicate<Interval> pred){
         interval.setVisible(interval.isVisible() || !pred.test(interval));
         for (Interval inter : interval.intervals) {
-            filter(inter, pred);
+            filterUndo(inter, pred);
         }
     }
 

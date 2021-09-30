@@ -67,7 +67,8 @@ public class Controller {
     @FXML private TreeView<CharacteristicPane> statAnalysisView;
     @FXML private Label characteristicLabel;
 
-    //----  Filter menu items  -----//
+    //----  Filter menu  -----//
+    @FXML private MenuButton filterMenuButton;
     @FXML private CheckMenuItem filterSignificantIntervalsItem;
 
     enum CompareType {
@@ -842,6 +843,19 @@ public class Controller {
 
     //------------  RESET SECTION  ------------//
 
+
+    @FXML public void resetFilter(){
+        //-----  Deselect all filter CheckMenuItems  -----//
+        filterSignificantIntervalsItem.setSelected(false);
+
+        if (statTreeView.getRoot() != null) {
+            Interval rootInterval = statTreeView.getRoot().getValue().getInterval();
+
+            Filter.reset(rootInterval);
+            initStatTree(rootInterval);
+        }
+    }
+
     private void resetCompareTypeChoiceBox() {
         compareTypeChoiceBox.getSelectionModel().select(0);
     }
@@ -868,6 +882,7 @@ public class Controller {
         statChart.getData().clear();
         statTreeView.setRoot(null);
         statSplitPane.setDividerPositions(0, 1);
+        resetFilter();
         setDisableLoadedStat(true);
         selectTab(0);
     }

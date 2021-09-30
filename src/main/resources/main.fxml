@@ -114,7 +114,7 @@
             <Label fx:id="statLabel" layoutX="14.0" layoutY="14.0" prefHeight="17.0" prefWidth="410.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="231.0" AnchorPane.topAnchor="14.0" />
             <Button fx:id="resetStatButton" layoutX="562.0" layoutY="8.0" mnemonicParsing="false" onAction="#resetLoadedStat" prefHeight="4.0" prefWidth="79.0" text="Сброс" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="8.0" />
             <ToggleButton fx:id="procAnalysisButton" layoutX="440.0" layoutY="9.0" mnemonicParsing="false" onAction="#procAnalysis" text="Попроцессорно" AnchorPane.rightAnchor="102.5" AnchorPane.topAnchor="8.0" />
-            <MenuButton layoutX="350.0" layoutY="8.0" mnemonicParsing="false" text="Фильтр" AnchorPane.rightAnchor="224.0" AnchorPane.topAnchor="8.0">
+            <MenuButton fx:id="filterMenuButton" layoutX="350.0" layoutY="8.0" mnemonicParsing="false" text="Фильтр" AnchorPane.rightAnchor="224.0" AnchorPane.topAnchor="8.0">
               <items>
                   <CheckMenuItem fx:id="filterSignificantIntervalsItem" mnemonicParsing="false" onAction="#filterSignificantIntervals" text="Только значимые" />
                   <Menu mnemonicParsing="false" text="По характеристикам">
@@ -123,7 +123,7 @@
                     </items>
                   </Menu>
                   <SeparatorMenuItem mnemonicParsing="false" />
-                  <MenuItem mnemonicParsing="false" text="Сброс" />
+                  <MenuItem mnemonicParsing="false" onAction="#resetFilter" text="Сброс" />
               </items>
             </MenuButton>
         </AnchorPane>
