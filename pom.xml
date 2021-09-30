@@ -43,6 +43,12 @@
             <artifactId>controlsfx</artifactId>
             <version>8.40.14</version>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
 </project>

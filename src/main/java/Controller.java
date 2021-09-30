@@ -36,6 +36,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -65,6 +66,9 @@ public class Controller {
     @FXML private ToggleButton procAnalysisButton;
     @FXML private TreeView<CharacteristicPane> statAnalysisView;
     @FXML private Label characteristicLabel;
+
+    //----  Filter menu items  -----//
+    @FXML private CheckMenuItem filterSignificantIntervalsItem;
 
     enum CompareType {
         lostTime,
@@ -99,13 +103,13 @@ public class Controller {
             lostTimeChartType = "Потерянное время",
             GPUChartType = "Сравнение GPU";
 
-    private void selectTab(int tabIndex){
+    private void selectTab(int tabIndex) {
         tabPane.getSelectionModel().select(tabIndex);
     }
 
     //-----  INIT SECTION  -----//
 
-    public void initController(){
+    public void initController() {
         initStatTable();
         resetLoadedStat();
         resetCompareStat();
@@ -114,7 +118,7 @@ public class Controller {
         initStatAnalysisTable();
     }
 
-    private void initCompareTypeChoiceBox(){
+    private void initCompareTypeChoiceBox() {
         compareTypeChoiceBox.getItems().clear();
         compareTypeChoiceBox.getItems().addAll(lostTimeChartType, GPUChartType);
         compareTypeChoiceBox.getSelectionModel().select(0);
@@ -129,7 +133,7 @@ public class Controller {
         });
     }
 
-    private void initSortMenu(){
+    private void initSortMenu() {
         sortMenu.getItems().clear();
         MenuItem numProc = new MenuItem(numProcSort);
         MenuItem lostTime = new MenuItem(lostTimeSort);
@@ -142,10 +146,10 @@ public class Controller {
         coef.setOnAction(event -> compareSort(coefSort));
     }
 
-    private void initStatTable(){
+    private void initStatTable() {
         statTableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        for (Object o : statTableView.getColumns()){
-            TableColumn<StatRow, String> tc = (TableColumn<StatRow, String>)o;
+        for (Object o : statTableView.getColumns()) {
+            TableColumn<StatRow, String> tc = (TableColumn<StatRow, String>) o;
             switch (tc.getText()) {
                 case "Статистика выполнения":
                     tc.setCellValueFactory(new PropertyValueFactory<>("statInfo"));
@@ -158,7 +162,7 @@ public class Controller {
         LoadStatList();
     }
 
-    private void initStatAnalysisTable(){
+    private void initStatAnalysisTable() {
         statAnalysisView.setShowRoot(false);
 
         TreeItem<CharacteristicPane> root = new TreeItem<>(new CharacteristicPane("root", "root"));
@@ -167,7 +171,7 @@ public class Controller {
 
     //-----  INIT SECTION END  -----//
 
-    private void switchCompareType(CompareType cType){
+    private void switchCompareType(CompareType cType) {
         if (curCompareType == cType)
             return;
         switch (cType) {
@@ -187,7 +191,7 @@ public class Controller {
             initCompareChart(selectedItem.getValue().getIntervals(), selectedItem.getValue().getPHeadings());
     }
 
-    public void compareSort(String typeCompare){
+    public void compareSort(String typeCompare) {
         if (compareList.size() == 0)
             return;
         List<Interval> selectedIntervals = statCompareTreeView.getSelectionModel().getSelectedItem()
@@ -243,11 +247,11 @@ public class Controller {
     private void addBlink(TreeItem treeItem) {
         new Timeline(
                 new KeyFrame(Duration.seconds(0),
-                        new KeyValue(((Node)treeItem.getValue()).opacityProperty(), 1.0)),
+                        new KeyValue(((Node) treeItem.getValue()).opacityProperty(), 1.0)),
                 new KeyFrame(Duration.seconds(0.3),
-                        new KeyValue(((Node)treeItem.getValue()).opacityProperty(), 0.3, Interpolator.EASE_OUT)),
+                        new KeyValue(((Node) treeItem.getValue()).opacityProperty(), 0.3, Interpolator.EASE_OUT)),
                 new KeyFrame(Duration.seconds(0.7),
-                        new KeyValue(((Node)treeItem.getValue()).opacityProperty(), 1.0, Interpolator.EASE_OUT))
+                        new KeyValue(((Node) treeItem.getValue()).opacityProperty(), 1.0, Interpolator.EASE_OUT))
         ).play();
         for (Object item : treeItem.getChildren()) {
             addBlink((TreeItem) item);
@@ -262,9 +266,14 @@ public class Controller {
         controller.init(interval.info.times.exec_time, interval.info.times.efficiency, interval.getType());
         p.setStyle(interval.getGradient(lostTime));
         p.setInterval(interval);
+        if (!interval.isVisible()) {
+            p.setOpacity(0.5);
+        }
         TreeItem<IntervalPane> treeItem = new TreeItem<>(p);
-        for (Interval inter: interval.intervals) {
-            treeItem.getChildren().add(getRootWithChildren(inter));
+        for (Interval inter : interval.intervals) {
+            if (inter.isVisible() || inter.hasVisibleChildren()) {
+                treeItem.getChildren().add(getRootWithChildren(inter));
+            }
         }
         treeItem.expandedProperty().addListener((observable, oldValue, newValue) -> addBlink(treeItem));
         treeItem.setExpanded(true);
@@ -290,9 +299,9 @@ public class Controller {
     }
 
     //-----  Find data number from css list  -----//
-    private Integer findDataNum(List<String> styleList){
+    private Integer findDataNum(List<String> styleList) {
         // TODO: find also for axes
-        for(String s: styleList){
+        for (String s : styleList) {
             if (pData.matcher(s).matches()) {
                 return Integer.decode(s.replaceAll("[^0-9]", ""));
             }
@@ -300,8 +309,8 @@ public class Controller {
         return null;
     }
 
-    private Integer findDataPartNum(List<String> styleList){
-        for(String s: styleList){
+    private Integer findDataPartNum(List<String> styleList) {
+        for (String s : styleList) {
             if (pDataPart.matcher(s).matches()) {
                 return Integer.decode(s.replaceAll("[^0-9]", ""));
             }
@@ -310,7 +319,7 @@ public class Controller {
     }
 
     //-----  Select Processor from Stat  -----//
-    private void selectProc(int procNum){
+    private void selectProc(int procNum) {
         Interval interval = getSelectedIntervalStat();
         if (procNum < 0 || interval == null
                 || interval.info.proc_times.get(procNum).gpu_times == null
@@ -329,7 +338,7 @@ public class Controller {
         HashSet<Node> data = new HashSet<>(statChart.lookupAll(".chart-bar"));
         String dataName = ".data" + procNum;
         data.removeAll(statChart.lookupAll(dataName));
-        for(Node n: data) {
+        for (Node n : data) {
             if (n.getStyleClass().contains("default-color0")) {
                 n.setStyle("-fx-background-color: #f8e7e8;");
             }
@@ -354,7 +363,7 @@ public class Controller {
     }
 
     //-----  Initializes stacked bar chart for selected interval  -----//
-    private void initStatChart(Interval interval){
+    private void initStatChart(Interval interval) {
         XYChart.Series<String, Double> series1 = new XYChart.Series<>();
         XYChart.Series<String, Double> series2 = new XYChart.Series<>();
         XYChart.Series<String, Double> series3 = new XYChart.Series<>();
@@ -367,7 +376,7 @@ public class Controller {
         List<ProcTimesJson> procTimes = interval.info.proc_times;
 
         //-----  Init proc data  ------//
-        for (int i = 0; i < procTimes.size(); ++i){
+        for (int i = 0; i < procTimes.size(); ++i) {
             series1.getData().add(new XYChart.Data<>(Integer.toString(i + 1), procTimes.get(i).insuf_sys));
             series2.getData().add(new XYChart.Data<>(Integer.toString(i + 1), procTimes.get(i).insuf_user));
             series3.getData().add(new XYChart.Data<>(Integer.toString(i + 1), procTimes.get(i).idle));
@@ -382,7 +391,7 @@ public class Controller {
         statChart.getData().addAll(series1, series2, series3, series4);
 
         //-----  Display labels  -----//
-        for (int i = 0; i < procTimes.size(); ++i){
+        for (int i = 0; i < procTimes.size(); ++i) {
             displayLabelForData(series1.getData().get(i));
             displayLabelForData(series2.getData().get(i));
             displayLabelForData(series3.getData().get(i));
@@ -391,8 +400,8 @@ public class Controller {
         statChart.setCategoryGap(20);
 
         statChart.setOnMouseClicked(mouseEvent -> {
-            if(mouseEvent.getButton().equals(MouseButton.PRIMARY)){
-                if(mouseEvent.getClickCount() == 2){
+            if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+                if (mouseEvent.getClickCount() == 2) {
                     Node node = mouseEvent.getPickResult().getIntersectedNode();
                     Integer dataNum = findDataNum(node.getStyleClass());
                     if (dataNum == null) {
@@ -406,7 +415,7 @@ public class Controller {
     }
 
     //-----  Initializes compare chart based on active mode  -----//
-    private void initCompareChart(List<Interval> intervals, List<String> p_headings){
+    private void initCompareChart(List<Interval> intervals, List<String> p_headings) {
         switch (curCompareType) {
             case lostTime:
                 initCompareLostChart(intervals, p_headings);
@@ -418,13 +427,13 @@ public class Controller {
     }
 
     //-----  Initializes all compare charts  -----//
-    private void initAllCompareCharts(List<Interval> intervals, List<String> p_headings){
+    private void initAllCompareCharts(List<Interval> intervals, List<String> p_headings) {
         initCompareLostChart(intervals, p_headings);
         initCompareGPUChart(intervals, p_headings);
     }
 
     //-----  Initializes stacked bar chart for comparison selected interval  -----//
-    private void initCompareLostChart(List<Interval> intervals, List<String> p_headings){
+    private void initCompareLostChart(List<Interval> intervals, List<String> p_headings) {
         XYChart.Series<String, Double> series1 = new XYChart.Series<>();
         XYChart.Series<String, Double> series2 = new XYChart.Series<>();
         XYChart.Series<String, Double> series3 = new XYChart.Series<>();
@@ -435,7 +444,7 @@ public class Controller {
         series4.setName("Коммуникации");
 
         //-----  Init lost time data  ------//
-        for (int i = 0; i < intervals.size(); ++i){
+        for (int i = 0; i < intervals.size(); ++i) {
             String xname = p_headings.get(i) + "\n"
                     + String.format("%.2f", intervals.get(i).info.times.exec_time) + "\n"
                     + String.format("%.2f", intervals.get(i).info.times.efficiency) + "\n"
@@ -454,7 +463,7 @@ public class Controller {
         statCompareChart.getData().addAll(series1, series2, series3, series4);
 
         //-----  Display labels  -----//
-        for (int i = 0; i < intervals.size(); ++i){
+        for (int i = 0; i < intervals.size(); ++i) {
             displayLabelForData(series1.getData().get(i));
             displayLabelForData(series2.getData().get(i));
             displayLabelForData(series3.getData().get(i));
@@ -463,7 +472,7 @@ public class Controller {
         statCompareChart.setCategoryGap(20);
 
         statCompareChart.setOnMouseClicked(mouseEvent -> {
-            if(mouseEvent.getButton().equals(MouseButton.PRIMARY)){
+            if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
                 if (mouseEvent.getClickCount() == 1) {
                     Node node = mouseEvent.getPickResult().getIntersectedNode();
                     Integer dataNum = findDataNum(node.getStyleClass());
@@ -480,7 +489,7 @@ public class Controller {
     }
 
     //-----  Initializes line chart for GPU comparison selected interval  -----//
-    private void initCompareGPUChart(List<Interval> intervals, List<String> p_headings){
+    private void initCompareGPUChart(List<Interval> intervals, List<String> p_headings) {
         XYChart.Series<String, Double> seriesGPUProd = new XYChart.Series<>();
         XYChart.Series<String, Double> seriesGPULost = new XYChart.Series<>();
         XYChart.Series<String, Double> seriesExec = new XYChart.Series<>();
@@ -489,7 +498,7 @@ public class Controller {
         seriesExec.setName("Время выполнения");
 
         //-----  Init series with GPU times data  -----//
-        for (int i = 0; i < intervals.size(); ++i){
+        for (int i = 0; i < intervals.size(); ++i) {
             String xname = "GPU Units: " + intervals.get(i).getGPUNum() + "\n"
                     + p_headings.get(i) + "\n"
                     + String.format("%.2f", intervals.get(i).info.times.exec_time) + "\n"
@@ -511,7 +520,8 @@ public class Controller {
 
     //-----  Analysis  -----//
 
-    @FXML public void procAnalysis() {
+    @FXML
+    public void procAnalysis() {
         if (procAnalysisButton.isSelected()) {
             enableProcAnalysis();
         } else {
@@ -530,25 +540,25 @@ public class Controller {
         selectProc(curProc);
     }
 
-    private void showAnalysis(){
+    private void showAnalysis() {
         characteristicLabel.setVisible(true);
         statAnalysisView.setVisible(true);
     }
 
-    private void hideAnalysis(){
+    private void hideAnalysis() {
         characteristicLabel.setVisible(false);
         statAnalysisView.setVisible(false);
     }
 
-    private void showProcAnalysis(){
+    private void showProcAnalysis() {
         GPUSplitPane.setVisible(true);
     }
 
-    private void hideProcAnalysis(){
+    private void hideProcAnalysis() {
         GPUSplitPane.setVisible(false);
     }
 
-    private void enableAnalysis(){
+    private void enableAnalysis() {
         Interval inter = getSelectedIntervalStat();
         hideProcAnalysis();
         showAnalysis();
@@ -558,8 +568,8 @@ public class Controller {
         initAnalysis(inter);
     }
 
-    private double getMaxWidth(List<TreeItem<CharacteristicPane>> list, int level, double max){
-        for (TreeItem<CharacteristicPane> item: list) {
+    private double getMaxWidth(List<TreeItem<CharacteristicPane>> list, int level, double max) {
+        for (TreeItem<CharacteristicPane> item : list) {
             double width = item.getValue().getBoundsInParent().getWidth();
             if (18 * level + width > max) {
                 max = 18 * level + width;
@@ -571,20 +581,20 @@ public class Controller {
         return max;
     }
 
-    private void initAnalysis(Interval inter){
+    private void initAnalysis(Interval inter) {
         CharacteristicPane efficiency = new CharacteristicPane("Parallelization efficiency", inter.info.times.efficiency),
-            execTime = new CharacteristicPane("Execution time", inter.info.times.exec_time),
-            processors = new CharacteristicPane("Processors", inter.info.times.nproc),
-            threads = new CharacteristicPane("Threads amount", inter.info.times.threadsOfAllProcs),
-            totalTime = new CharacteristicPane("Total time", inter.info.times.sys_time),
-            prodTime = new CharacteristicPane("Productive time", inter.info.times.prod),
-            lostTime = new CharacteristicPane("Lost time", inter.info.times.lost_time),
+                execTime = new CharacteristicPane("Execution time", inter.info.times.exec_time),
+                processors = new CharacteristicPane("Processors", inter.info.times.nproc),
+                threads = new CharacteristicPane("Threads amount", inter.info.times.threadsOfAllProcs),
+                totalTime = new CharacteristicPane("Total time", inter.info.times.sys_time),
+                prodTime = new CharacteristicPane("Productive time", inter.info.times.prod),
+                lostTime = new CharacteristicPane("Lost time", inter.info.times.lost_time),
                 insufParallelism = new CharacteristicPane("Insufficient parallelism", inter.info.times.insuf),
-                    insufParallelismSys = new CharacteristicPane("Sys", inter.info.times.insuf_sys),
-                    insufParallelismUser = new CharacteristicPane("User", inter.info.times.insuf_user),
+                insufParallelismSys = new CharacteristicPane("Sys", inter.info.times.insuf_sys),
+                insufParallelismUser = new CharacteristicPane("User", inter.info.times.insuf_user),
                 comm = new CharacteristicPane("Communication", inter.info.times.comm),
                 idleTime = new CharacteristicPane("Idle time", inter.info.times.idle),
-            loadImbalance = new CharacteristicPane("Load imbalance", inter.info.times.load_imb);
+                loadImbalance = new CharacteristicPane("Load imbalance", inter.info.times.load_imb);
 
         TreeItem<CharacteristicPane> efficiencyItem = new TreeItem<>(efficiency),
                 execTimeItem = new TreeItem<>(execTime),
@@ -593,11 +603,11 @@ public class Controller {
                 totalTimeItem = new TreeItem<>(totalTime),
                 prodTimeItem = new TreeItem<>(prodTime),
                 lostTimeItem = new TreeItem<>(lostTime),
-                    insufParallelismItem = new TreeItem<>(insufParallelism),
-                        insufParallelismSysItem = new TreeItem<>(insufParallelismSys),
-                        insufParallelismUserItem = new TreeItem<>(insufParallelismUser),
-                    commItem = new TreeItem<>(comm),
-                    idleTimeItem = new TreeItem<>(idleTime),
+                insufParallelismItem = new TreeItem<>(insufParallelism),
+                insufParallelismSysItem = new TreeItem<>(insufParallelismSys),
+                insufParallelismUserItem = new TreeItem<>(insufParallelismUser),
+                commItem = new TreeItem<>(comm),
+                idleTimeItem = new TreeItem<>(idleTime),
                 loadImbalanceItem = new TreeItem<>(loadImbalance);
 
         commItem.getValue().getStyleClass().add("comm");
@@ -615,26 +625,27 @@ public class Controller {
 
 //        System.out.println();
 
-
         insufParallelismItem.expandedProperty().addListener((observable, oldValue, newValue) -> addBlink(insufParallelismItem));
         lostTimeItem.expandedProperty().addListener((observable, oldValue, newValue) -> addBlink(lostTimeItem));
     }
 
     //-----  Analysis END  -----//
 
-    private void initStat(@org.jetbrains.annotations.NotNull Stat stat) throws Exception{
-        resetProc(true, true);
+    private void initStatTree(Interval rootInterval) {
+        lostTime = rootInterval.info.times.lost_time;
+        TreeItem<IntervalPane> root;
 
-        statLabel.setText(stat.getHeader());
+        try {
+            root = getRootWithChildren(rootInterval);
+        } catch (Exception e) {
+            System.out.println("Error initializing Stat interval tree: " + e);
+            return;
+        }
 
-        //-----  Init tree  -----//
-        lostTime = stat.interval.info.times.lost_time;
-        TreeItem<IntervalPane> root = getRootWithChildren(stat.interval);
         statTreeView.setRoot(root);
-
         statTreeView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        statTreeView.getSelectionModel().selectedItemProperty().addListener(
-                (observable, oldValue, newValue) -> {
+        statTreeView.getSelectionModel().selectedItemProperty()
+                .addListener((observable, oldValue, newValue) -> {
                     if (newValue != null) {
                         if (procAnalysisButton.isSelected()) {
                             initStatChart(newValue.getValue().getInterval());
@@ -645,8 +656,18 @@ public class Controller {
                     }
         });
 
-        //-----  Adjust style  -----//
         statTreeView.getSelectionModel().select(0);
+    }
+
+    private void initStat(@org.jetbrains.annotations.NotNull Stat stat) throws Exception{
+        resetProc(true, true);
+
+        statLabel.setText(stat.getHeader());
+
+        //-----  Init tree  -----//
+        initStatTree(stat.interval);
+
+        //-----  Adjust style  -----//
         statSplitPane.setDividerPositions(statChart.getWidth() / statSplitPane.getWidth(), 1);
         SplitPane.setResizableWithParent(statSplitPane.getItems().get(0), true);
         SplitPane.setResizableWithParent(statSplitPane.getItems().get(1), true);
@@ -805,6 +826,20 @@ public class Controller {
         selectTab(2);
     }
 
+    @FXML public void filterSignificantIntervals(){
+        double p = 0.05; // more then 5% of execution time
+        Interval rootInterval = statTreeView.getRoot().getValue().getInterval();
+        double full_time = rootInterval.info.times.exec_time;
+        Predicate<Interval> pred = inter -> inter.info.times.exec_time >= p * full_time;
+        if (filterSignificantIntervalsItem.isSelected()) {
+            Filter.filter(rootInterval, pred);
+        } else {
+            Filter.filterUndo(rootInterval, pred);
+        }
+
+        initStatTree(rootInterval);
+    }
+
     //------------  RESET SECTION  ------------//
 
     private void resetCompareTypeChoiceBox() {
@@ -852,16 +887,30 @@ public class Controller {
     //------------    DISABLE SECTION    ------------//
 
     private void setDisableLoadedStat(boolean disable) {
-        resetStatButton.setDisable(disable);
-        statSplitPane.setDisable(disable);
+        try {
+            tabPane.getTabs().get(1).setDisable(disable);
+        } catch (Exception e) {
+            System.out.println("Error setting 'Disable' value for Loaded Stat tab: " + e);
+
+            procAnalysisButton.setDisable(disable);
+            resetStatButton.setDisable(disable);
+            statSplitPane.setDisable(disable);
+        }
     }
 
     private void setDisableCompare(boolean disable) {
-        sortMenu.setDisable(disable);
-        showCompareTreeButton.setDisable(disable);
-        compareSplitPane.setDisable(disable);
-        resetCompareStatButton.setDisable(disable);
-        compareTypeChoiceBox.setDisable(disable);
+        try {
+            tabPane.getTabs().get(2).setDisable(disable);
+        } catch (Exception e) {
+            System.out.println("Error setting 'Disable' value for Compare Stats tab: " + e);
+
+            sortMenu.setDisable(disable);
+            showCompareTreeButton.setDisable(disable);
+            compareSplitPane.setDisable(disable);
+            resetCompareStatButton.setDisable(disable);
+            compareTypeChoiceBox.setDisable(disable);
+        }
+
     }
 
     //------------  DISABLE SECTION END  ------------//

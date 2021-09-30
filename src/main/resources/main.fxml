@@ -6,12 +6,15 @@
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.chart.StackedBarChart?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckMenuItem?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
@@ -25,7 +28,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
 
-<TabPane fx:id="tabPane" prefHeight="515.0" prefWidth="655.0" stylesheets="@bootstrap3.css" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
+<TabPane fx:id="tabPane" prefHeight="515.0" prefWidth="655.0" stylesheets="@bootstrap3.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
 <tabs>
     <Tab fx:id="loadStatsTab" closable="false" text="Загрузка статистик">
         <AnchorPane>
@@ -110,7 +113,19 @@
             </SplitPane>
             <Label fx:id="statLabel" layoutX="14.0" layoutY="14.0" prefHeight="17.0" prefWidth="410.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="231.0" AnchorPane.topAnchor="14.0" />
             <Button fx:id="resetStatButton" layoutX="562.0" layoutY="8.0" mnemonicParsing="false" onAction="#resetLoadedStat" prefHeight="4.0" prefWidth="79.0" text="Сброс" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="8.0" />
-            <ToggleButton fx:id="procAnalysisButton" layoutX="440.0" layoutY="9.0" mnemonicParsing="false" onAction="#procAnalysis" text="Попроцессорно" AnchorPane.rightAnchor="102.5" AnchorPane.topAnchor="9.0" />
+            <ToggleButton fx:id="procAnalysisButton" layoutX="440.0" layoutY="9.0" mnemonicParsing="false" onAction="#procAnalysis" text="Попроцессорно" AnchorPane.rightAnchor="102.5" AnchorPane.topAnchor="8.0" />
+            <MenuButton layoutX="350.0" layoutY="8.0" mnemonicParsing="false" text="Фильтр" AnchorPane.rightAnchor="224.0" AnchorPane.topAnchor="8.0">
+              <items>
+                  <CheckMenuItem fx:id="filterSignificantIntervalsItem" mnemonicParsing="false" onAction="#filterSignificantIntervals" text="Только значимые" />
+                  <Menu mnemonicParsing="false" text="По характеристикам">
+                    <items>
+                        <CheckMenuItem mnemonicParsing="false" text="Коммуникации" />
+                    </items>
+                  </Menu>
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem mnemonicParsing="false" text="Сброс" />
+              </items>
+            </MenuButton>
         </AnchorPane>
     </Tab>
     <Tab fx:id="compareStatsTab" closable="false" text="Сравнение статистик">

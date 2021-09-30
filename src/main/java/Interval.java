@@ -9,10 +9,32 @@ public class Interval implements Cloneable {
     public List<Interval> intervals = new ArrayList<>();
     public IntervalJson info;
     public String text = "";
+    public boolean visible = true;
 
     public static final int SEQ = 21, PAR = 22, USER = 23;
 
     public Interval(){}
+
+    public boolean isVisible() {
+        return visible;
+    }
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
+    public boolean hasVisibleChildren() {
+        for (Interval inter : intervals)
+        {
+            if (inter.isVisible())
+                return true;
+        }
+
+        for (Interval inter : intervals) {
+            if (inter.hasVisibleChildren())
+                return true;
+        }
+
+        return false;
+    }
 
     public String getType(){
         switch (info.id.t) {
@@ -50,14 +72,13 @@ public class Interval implements Cloneable {
             if (inter.info.id.t != USER)
                 return true;
         }
-        boolean result = false;
-        int i = 0;
-        while (i < intervals.size() && !result)
-        {
-            result = intervals.get(i).hasChildLoopInterval();
-            ++i;
+
+        for (Interval inter : intervals) {
+            if (inter.hasChildLoopInterval())
+                return true;
         }
-        return result;
+
+        return false;
     }
 
     public Interval(List<IntervalJson> intervals, String dir, boolean withText)
