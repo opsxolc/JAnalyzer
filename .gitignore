@@ -1,3 +1,4 @@
+statistics/*
 *.class
 target/*
 target/classes/LibraryImport.class

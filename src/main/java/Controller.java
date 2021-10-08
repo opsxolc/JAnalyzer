@@ -17,6 +17,8 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import json.GPUTimesJson;
@@ -64,7 +66,7 @@ public class Controller {
     @FXML private SplitPane GPUSplitPane;
     @FXML private ScrollPane GPUScrollPane;
     @FXML private ToggleButton procAnalysisButton;
-    @FXML private TreeView<CharacteristicPane> statAnalysisView;
+    @FXML private TreeView<CharacteristicPane<?>> statAnalysisView;
     @FXML private Label characteristicLabel;
 
     //----  Filter menu  -----//
@@ -167,7 +169,7 @@ public class Controller {
     private void initStatAnalysisTable() {
         statAnalysisView.setShowRoot(false);
 
-        TreeItem<CharacteristicPane> root = new TreeItem<>(new CharacteristicPane("root", "root"));
+        TreeItem<CharacteristicPane<?>> root = new TreeItem<>(new CharacteristicPane<>("root", "root"));
         statAnalysisView.setRoot(root);
     }
 
@@ -584,21 +586,35 @@ public class Controller {
     }
 
     private void initAnalysis(Interval inter) {
-        CharacteristicPane efficiency = new CharacteristicPane("Parallelization efficiency", inter.info.times.efficiency),
-                execTime = new CharacteristicPane("Execution time", inter.info.times.exec_time),
-                processors = new CharacteristicPane("Processors", inter.info.times.nproc),
-                threads = new CharacteristicPane("Threads amount", inter.info.times.threadsOfAllProcs),
-                totalTime = new CharacteristicPane("Total time", inter.info.times.sys_time),
-                prodTime = new CharacteristicPane("Productive time", inter.info.times.prod),
-                lostTime = new CharacteristicPane("Lost time", inter.info.times.lost_time),
-                insufParallelism = new CharacteristicPane("Insufficient parallelism", inter.info.times.insuf),
-                insufParallelismSys = new CharacteristicPane("Sys", inter.info.times.insuf_sys),
-                insufParallelismUser = new CharacteristicPane("User", inter.info.times.insuf_user),
-                comm = new CharacteristicPane("Communication", inter.info.times.comm),
-                idleTime = new CharacteristicPane("Idle time", inter.info.times.idle),
-                loadImbalance = new CharacteristicPane("Load imbalance", inter.info.times.load_imb);
+        Paint effColor = Color.GREEN;
+        if (inter.info.times.efficiency <= 0.5)
+            effColor = Color.RED;
+        else if (inter.info.times.efficiency <= 0.8)
+            effColor = Color.ORANGE;
 
-        TreeItem<CharacteristicPane> efficiencyItem = new TreeItem<>(efficiency),
+        Paint lostColor = Color.RED;
+        if (inter.info.times.lost_time <= 0.2 * inter.info.times.sys_time)
+            lostColor = Color.GREEN;
+        else if (inter.info.times.lost_time <= 0.5 * inter.info.times.sys_time)
+            lostColor = Color.ORANGE;
+
+        CharacteristicPane<?>
+                efficiency = new CharacteristicPane<>("Коэффициент эффективности", inter.info.times.efficiency, effColor),
+                execTime = new CharacteristicPane<>("Время выполнения", inter.info.times.exec_time),
+                processors = new CharacteristicPane<>("Количество процессоров", inter.info.times.nproc),
+                threads = new CharacteristicPane<>("Общее количество нитей", inter.info.times.threadsOfAllProcs),
+                totalTime = new CharacteristicPane<>("Общее время", inter.info.times.sys_time),
+                prodTime = new CharacteristicPane<>("Полезное время", inter.info.times.prod),
+                lostTime = new CharacteristicPane<>("Потерянное время", inter.info.times.lost_time, lostColor),
+                insufParallelism = new CharacteristicPane<>("Неэффективный параллелизм", inter.info.times.insuf),
+                insufParallelismSys = new CharacteristicPane<>("Системный", inter.info.times.insuf_sys),
+                insufParallelismUser = new CharacteristicPane<>("Пользовательский", inter.info.times.insuf_user),
+                comm = new CharacteristicPane<>("Коммуникации", inter.info.times.comm),
+                idleTime = new CharacteristicPane<>("Простои", inter.info.times.idle),
+                loadImbalance = new CharacteristicPane<>("Неравномерность загрузки", inter.info.times.load_imb);
+
+        TreeItem<CharacteristicPane<?>>
+                efficiencyItem = new TreeItem<>(efficiency),
                 execTimeItem = new TreeItem<>(execTime),
                 processorsItem = new TreeItem<>(processors),
                 threadsItem = new TreeItem<>(threads),

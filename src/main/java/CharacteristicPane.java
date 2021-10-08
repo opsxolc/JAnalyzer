@@ -4,8 +4,15 @@ import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 
-public class CharacteristicPane extends GridPane {
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
+import static java.awt.Color.black;
+
+public class CharacteristicPane<T> extends GridPane {
     private Characteristic characteristic;
 
     public Characteristic getCharacteristic(){return characteristic;}
@@ -13,9 +20,16 @@ public class CharacteristicPane extends GridPane {
         this.characteristic = characteristic;
     }
 
-    private void initPane(){
+    private static final NumberFormat f4 = new DecimalFormat("#0.####");
+
+    private void initPane(Paint color){
         Label nameLabel = new Label(characteristic.getName());
-        Label valueLabel = new Label(characteristic.getStringVal());
+        String strVal = characteristic.getVal().toString();
+        if (characteristic.getVal().getClass() == Double.class || characteristic.getVal().getClass() == Float.class)
+            strVal = f4.format(characteristic.getVal());
+        Label valueLabel = new Label(strVal);
+        valueLabel.setTextFill(color);
+
         nameLabel.setAlignment(Pos.CENTER_LEFT);
         valueLabel.setAlignment(Pos.CENTER_RIGHT);
         addRow(0, nameLabel, valueLabel);
@@ -35,29 +49,25 @@ public class CharacteristicPane extends GridPane {
 
     }
 
+    private void initPane(){
+        initPane(Color.BLACK);
+    }
 
-    public CharacteristicPane(Characteristic characteristic){
+    public CharacteristicPane(Characteristic<T> characteristic, Paint color){
         super();
         this.characteristic = characteristic;
-        initPane();
+        initPane(color);
     }
 
-    public CharacteristicPane(String name, String value){
+    public CharacteristicPane(String name, T value, Paint color){
         super();
-        this.characteristic = new Characteristic(name, value);
-        initPane();
+        this.characteristic = new Characteristic<>(name, value);
+        initPane(color);
     }
 
-    public CharacteristicPane(String name, double value){
+    public CharacteristicPane(String name, T value){
         super();
-        this.characteristic = new Characteristic(name, value);
+        this.characteristic = new Characteristic<>(name, value);
         initPane();
     }
-
-    public CharacteristicPane(String name, int value){
-        super();
-        this.characteristic = new Characteristic(name, value);
-        initPane();
-    }
-
 }
