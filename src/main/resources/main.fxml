@@ -30,7 +30,7 @@
 
 <TabPane fx:id="tabPane" prefHeight="515.0" prefWidth="655.0" stylesheets="@bootstrap3.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
 <tabs>
-    <Tab fx:id="loadStatsTab" closable="false" text="Загрузка статистик">
+    <Tab fx:id="loadStatsTab" closable="false" text="Загрузка">
         <AnchorPane>
             <TextField fx:id="loadPath" layoutX="14.0" layoutY="7.0" prefHeight="27.0" prefWidth="529.0" promptText="Enter full path to sts.gz+ file" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="112.0" AnchorPane.topAnchor="9.0" />
             <Button fx:id="saveStatButton" layoutX="552.0" layoutY="10.0" onAction="#saveStat" prefHeight="20.0" prefWidth="89.0" text="Импорт" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="10.0" />
@@ -45,7 +45,7 @@
             <Button fx:id="deleteButton" layoutX="552.0" layoutY="115.0" onAction="#deleteStat" prefWidth="89.0" text="Удалить" visible="false" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="115.0" />
         </AnchorPane>
     </Tab>
-    <Tab fx:id="showStatTab" closable="false" text="Единичная статистика">
+    <Tab fx:id="showStatTab" closable="false" text="Анализ">
         <AnchorPane prefHeight="436.0" prefWidth="655.0">
             <SplitPane fx:id="statSplitPane" dividerPositions="0.5375191424196019, 0.8545176110260337" layoutY="47.0" scaleShape="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="47.0">
                 <items>
@@ -116,10 +116,10 @@
             <ToggleButton fx:id="procAnalysisButton" layoutX="440.0" layoutY="9.0" mnemonicParsing="false" onAction="#procAnalysis" text="Попроцессорно" AnchorPane.rightAnchor="102.5" AnchorPane.topAnchor="8.0" />
             <MenuButton fx:id="filterMenuButton" layoutX="350.0" layoutY="8.0" mnemonicParsing="false" text="Фильтр" AnchorPane.rightAnchor="224.0" AnchorPane.topAnchor="8.0">
               <items>
-                  <CheckMenuItem fx:id="filterSignificantIntervalsItem" mnemonicParsing="false" onAction="#filterSignificantIntervals" text="Только значимые" />
-                  <Menu mnemonicParsing="false" text="По характеристикам">
+                  <Menu mnemonicParsing="false" text="Только значимые">
                     <items>
-                        <CheckMenuItem mnemonicParsing="false" text="Коммуникации" />
+                        <CheckMenuItem fx:id="filterExecSignificantIntervalsItem" mnemonicParsing="false" onAction="#filterExecSignificantIntervals" text="Время выполнения" />
+                        <CheckMenuItem fx:id="filterLostSignificantIntervalsItem" mnemonicParsing="false" onAction="#filterLostSignificantIntervals" text="Потерянное время" />
                     </items>
                   </Menu>
                   <SeparatorMenuItem mnemonicParsing="false" />
@@ -128,7 +128,7 @@
             </MenuButton>
         </AnchorPane>
     </Tab>
-    <Tab fx:id="compareStatsTab" closable="false" text="Сравнение статистик">
+    <Tab fx:id="compareStatsTab" closable="false" text="Сравнение">
          <content>
             <AnchorPane>
                <children>

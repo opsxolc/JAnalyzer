@@ -10,16 +10,9 @@ public class Filter {
     }
 
     static public void filter(Interval interval, Predicate<Interval> pred){
-        interval.setVisible(interval.isVisible() && pred.test(interval));
+        interval.setVisible(pred.test(interval));
         for (Interval inter : interval.intervals) {
             filter(inter, pred);
-        }
-    }
-
-    static public void filterUndo(Interval interval, Predicate<Interval> pred){
-        interval.setVisible(interval.isVisible() || !pred.test(interval));
-        for (Interval inter : interval.intervals) {
-            filterUndo(inter, pred);
         }
     }
 

@@ -69,7 +69,8 @@ public class Controller {
 
     //----  Filter menu  -----//
     @FXML private MenuButton filterMenuButton;
-    @FXML private CheckMenuItem filterSignificantIntervalsItem;
+    @FXML private CheckMenuItem filterExecSignificantIntervalsItem;
+    @FXML private CheckMenuItem filterLostSignificantIntervalsItem;
 
     enum CompareType {
         lostTime,
@@ -624,8 +625,6 @@ public class Controller {
         statAnalysisView.getRoot().getChildren().addAll(efficiencyItem, execTimeItem, processorsItem,
                 threadsItem, totalTimeItem, prodTimeItem, lostTimeItem, loadImbalanceItem);
 
-//        System.out.println();
-
         insufParallelismItem.expandedProperty().addListener((observable, oldValue, newValue) -> addBlink(insufParallelismItem));
         lostTimeItem.expandedProperty().addListener((observable, oldValue, newValue) -> addBlink(lostTimeItem));
     }
@@ -827,26 +826,46 @@ public class Controller {
         selectTab(2);
     }
 
-    @FXML public void filterSignificantIntervals(){
-        double p = 0.05; // more then 5% of execution time
+    Predicate<Interval> truePredicate = t -> true, predExec = truePredicate, predLost = truePredicate;
+
+    @FXML public void filterExecSignificantIntervals(){
         Interval rootInterval = statTreeView.getRoot().getValue().getInterval();
-        double full_time = rootInterval.info.times.exec_time;
-        Predicate<Interval> pred = inter -> inter.info.times.exec_time >= p * full_time;
-        if (filterSignificantIntervalsItem.isSelected()) {
-            Filter.filter(rootInterval, pred);
+
+        if (filterExecSignificantIntervalsItem.isSelected()) {
+            double p = 0.05; // more then 5% of execution time
+            double full_time = rootInterval.info.times.exec_time;
+            predExec = inter -> inter.info.times.exec_time >= p * full_time;
         } else {
-            Filter.filterUndo(rootInterval, pred);
+            predExec = truePredicate;
         }
+
+        Filter.filter(rootInterval, predLost.and(predExec));
+
+        initStatTree(rootInterval);
+    }
+
+    @FXML public void filterLostSignificantIntervals(){
+        Interval rootInterval = statTreeView.getRoot().getValue().getInterval();
+
+        if (filterLostSignificantIntervalsItem.isSelected()) {
+            double p = 0.05; // more then 5% of lost time
+            double full_time = rootInterval.info.times.lost_time;
+            predLost = inter -> inter.info.times.lost_time >= p * full_time;
+        } else {
+            predLost = truePredicate;
+        }
+
+        Filter.filter(rootInterval, predLost.and(predExec));
 
         initStatTree(rootInterval);
     }
 
     //------------  RESET SECTION  ------------//
 
-
     @FXML public void resetFilter(){
         //-----  Deselect all filter CheckMenuItems  -----//
-        filterSignificantIntervalsItem.setSelected(false);
+        filterExecSignificantIntervalsItem.setSelected(false);
+        filterLostSignificantIntervalsItem.setSelected(false);
 
         if (statTreeView.getRoot() != null) {
             Interval rootInterval = statTreeView.getRoot().getValue().getInterval();
