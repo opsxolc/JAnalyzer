@@ -26,4 +26,32 @@ public class InterTimesJson {
     public double gpu_time_lost;
     public long nproc;
     public long threadsOfAllProcs;
+
+    public void addTimes(InterTimesJson times) {
+        prod_cpu += times.prod_cpu;
+        prod_sys += times.prod_sys;
+        prod_io += times.prod_io;
+        prod += times.prod;
+        exec_time += times.exec_time;
+        sys_time += times.sys_time;
+        efficiency = (efficiency + times.efficiency) / 2; // average
+        lost_time += times.lost_time;
+        insuf += times.insuf;
+        insuf_user += times.insuf_user;
+        insuf_sys += times.insuf_user;
+        comm += times.comm;
+        real_comm += times.real_comm;
+        comm_start += times.comm_start;
+        idle += times.idle;
+        load_imb += times.load_imb;
+        synch += times.synch;
+        time_var += times.time_var;
+        overlap += times.overlap;
+        thr_user_time += times.thr_user_time;
+        thr_sys_time += times.thr_sys_time;
+        gpu_time_prod += times.gpu_time_prod;
+        gpu_time_lost += times.gpu_time_lost;
+        nproc += times.nproc;
+        threadsOfAllProcs += times.threadsOfAllProcs;
+    }
 }

@@ -1,7 +1,9 @@
 public class StatRow {
-    private String statInfo;
-    private String creationTime;
-    private Stat stat;
+    protected String statInfo;
+    protected String creationTime;
+    protected Stat stat;
+
+    public StatRow(){}
 
     public StatRow(String statInfo, String creationTime, Stat stat) {
         this.creationTime = creationTime;

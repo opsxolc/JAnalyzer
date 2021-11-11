@@ -20,6 +20,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
 import javafx.util.Duration;
 import json.GPUTimesJson;
 import json.IntervalJson;
@@ -46,7 +48,6 @@ import java.util.stream.IntStream;
 public class Controller {
 
     @FXML private TabPane tabPane;
-    @FXML private TextField loadPath;
     @FXML private TextArea statIntervalText;
     @FXML private Label statLabel;
     @FXML private TreeView<IntervalPane> statTreeView;
@@ -66,8 +67,11 @@ public class Controller {
     @FXML private SplitPane GPUSplitPane;
     @FXML private ScrollPane GPUScrollPane;
     @FXML private ToggleButton procAnalysisButton;
-    @FXML private TreeView<CharacteristicPane<?>> statAnalysisView;
+    @FXML private TreeView statAnalysisView;
     @FXML private Label characteristicLabel;
+
+    private FileChooser fileChooser;
+    private Window primaryStage;
 
     //----  Filter menu  -----//
     @FXML private MenuButton filterMenuButton;
@@ -113,13 +117,16 @@ public class Controller {
 
     //-----  INIT SECTION  -----//
 
-    public void initController() {
+    public void initController(Window primaryStage) {
+        this.primaryStage = primaryStage;
+
         initStatTable();
         resetLoadedStat();
         resetCompareStat();
         initSortMenu();
         initCompareTypeChoiceBox();
         initStatAnalysisTable();
+        initFileChooser();
     }
 
     private void initCompareTypeChoiceBox() {
@@ -135,6 +142,13 @@ public class Controller {
                     switchCompareType(CompareType.GPU);
             }
         });
+    }
+
+    private void initFileChooser() {
+        fileChooser = new FileChooser();
+
+        fileChooser.setTitle("Выберите статистику(и) для загрузки");
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
     }
 
     private void initSortMenu() {
@@ -572,19 +586,6 @@ public class Controller {
         initAnalysis(inter);
     }
 
-    private double getMaxWidth(List<TreeItem<CharacteristicPane>> list, int level, double max) {
-        for (TreeItem<CharacteristicPane> item : list) {
-            double width = item.getValue().getBoundsInParent().getWidth();
-            if (18 * level + width > max) {
-                max = 18 * level + width;
-            }
-            double newMax = getMaxWidth(item.getChildren(), level + 1, max);
-            if (newMax > max)
-                max = newMax;
-        }
-        return max;
-    }
-
     private void initAnalysis(Interval inter) {
         Paint effColor = Color.GREEN;
         if (inter.info.times.efficiency <= 0.5)
@@ -620,29 +621,30 @@ public class Controller {
                 threadsItem = new TreeItem<>(threads),
                 totalTimeItem = new TreeItem<>(totalTime),
                 prodTimeItem = new TreeItem<>(prodTime),
-                lostTimeItem = new TreeItem<>(lostTime),
-                insufParallelismItem = new TreeItem<>(insufParallelism),
-                insufParallelismSysItem = new TreeItem<>(insufParallelismSys),
-                insufParallelismUserItem = new TreeItem<>(insufParallelismUser),
-                commItem = new TreeItem<>(comm),
-                idleTimeItem = new TreeItem<>(idleTime),
                 loadImbalanceItem = new TreeItem<>(loadImbalance);
 
-        commItem.getValue().getStyleClass().add("comm");
-        insufParallelismItem.getValue().getStyleClass().add("insuf");
-        insufParallelismSysItem.getValue().getStyleClass().add("insuf-sys");
-        insufParallelismUserItem.getValue().getStyleClass().add("insuf-user");
-        idleTimeItem.getValue().getStyleClass().add("idle");
+        List<LabeledProgressBar> labelesPBs = Arrays.asList(
+        /* 0 */ new LabeledProgressBar(lostTime, inter.info.times.lost_time, inter.info.times.sys_time),
+        /* 1 */ new LabeledProgressBar(comm, inter.info.times.comm, inter.info.times.lost_time),
+        /* 2 */ new LabeledProgressBar(insufParallelism, inter.info.times.insuf, inter.info.times.lost_time),
+        /* 3 */ new LabeledProgressBar(insufParallelismSys, inter.info.times.insuf_sys, inter.info.times.insuf),
+        /* 4 */ new LabeledProgressBar(insufParallelismUser, inter.info.times.insuf_user, inter.info.times.insuf),
+        /* 5 */ new LabeledProgressBar(idleTime, inter.info.times.idle, inter.info.times.lost_time)
+        );
 
-        insufParallelismItem.getChildren().addAll(insufParallelismSysItem, insufParallelismUserItem);
-        lostTimeItem.getChildren().addAll(insufParallelismItem, commItem, idleTimeItem);
+        List<TreeItem> treeItems = labelesPBs.stream().map(pb -> new TreeItem<>(pb)).collect(Collectors.toList());
+
+        treeItems.get(2).getChildren().addAll(treeItems.get(3), treeItems.get(4));
+        treeItems.get(0).getChildren().addAll(treeItems.get(2), treeItems.get(1), treeItems.get(5));
 
         statAnalysisView.getRoot().getChildren().clear();
         statAnalysisView.getRoot().getChildren().addAll(efficiencyItem, execTimeItem, processorsItem,
-                threadsItem, totalTimeItem, prodTimeItem, lostTimeItem, loadImbalanceItem);
+                threadsItem, totalTimeItem, prodTimeItem, treeItems.get(0), loadImbalanceItem);
 
-        insufParallelismItem.expandedProperty().addListener((observable, oldValue, newValue) -> addBlink(insufParallelismItem));
-        lostTimeItem.expandedProperty().addListener((observable, oldValue, newValue) -> addBlink(lostTimeItem));
+        treeItems.get(2).expandedProperty().addListener((observable, oldValue, newValue) -> addBlink(treeItems.get(2)));
+        treeItems.get(0).expandedProperty().addListener((observable, oldValue, newValue) -> addBlink(treeItems.get(0)));
+
+        treeItems.get(0).setExpanded(true);
     }
 
     //-----  Analysis END  -----//
@@ -803,8 +805,6 @@ public class Controller {
         File statDir = new File(Main.StatDirPath);
         File[] dirs = statDir.listFiles((current, name) ->
                 new File(current, name).isDirectory() && Pattern.compile("-?[0-9]*$").matcher(name).matches());
-        File file;
-        String creationTime;
         if (dirs == null)
             return;
         for (File dir : dirs)
@@ -813,16 +813,24 @@ public class Controller {
                 File[] files = dir.listFiles((current, name) -> Pattern.compile(".*json$").matcher(name).matches());
                 if (files == null || files.length == 0)
                     throw new Exception("No json stat file in directory " + dir.getName());
-                file = files[0];
+                File file = files[0];
                 long cTime = ((FileTime) Files.getAttribute(file.toPath(), "creationTime")).toMillis();
                 ZonedDateTime t = Instant.ofEpochMilli(cTime).atZone(ZoneId.systemDefault());
-                creationTime = dtf.format(t);
                 String json = Main.readFile(file.getAbsolutePath(), StandardCharsets.UTF_8);
                 Stat stat = new Stat(json, dir.getAbsolutePath(), false);
-                AddStatToList(stat, creationTime);
+                AddStatToList(stat, dtf.format(t));
+//                    List<Stat> stats = new ArrayList<>(files.length);
+//                    for (File file : files) {
+//                        int index = Integer.parseInt(file.getName().replaceAll("[\\D]", ""));
+//                        long cTime = ((FileTime) Files.getAttribute(file.toPath(), "creationTime")).toMillis();
+//                        ZonedDateTime t = Instant.ofEpochMilli(cTime).atZone(ZoneId.systemDefault());
+//                        creationTime = dtf.format(t);
+//                        String json = Main.readFile(file.getAbsolutePath(), StandardCharsets.UTF_8);
+//                        Stat stat = new Stat(json, dir.getAbsolutePath(), false, false);
+//                        stats.set(index, stat);
+//                    }
             } catch (Exception e){
-                System.out.println("Error occurred loading dir " + dir);
-                System.out.println(e.toString());
+                System.out.println("Error occurred loading dir " + dir + ": " + e.toString());
             }
 
         }
@@ -976,41 +984,37 @@ public class Controller {
     }
 
     @FXML public void saveStat() throws Exception{
+        List<File> files = fileChooser.showOpenMultipleDialog(primaryStage);
+
+        File file = files.get(0);
+
         Stat stat;
-        String res = LibraryImport.readStat(loadPath.getText());
+
+        if (files.size() != 1) {
+            stat = new Stat();
+            try {
+                stat.parseMulti(files);
+            } catch (Exception e) {
+                System.out.println("Error parsing multi stat: " + e.toString());
+                return;
+            }
+            AddStatToList(stat, dtf.format(LocalDateTime.now()));
+            return;
+        }
+
+        String res = LibraryImport.readStat(file.getAbsolutePath());
         if (res == null) {
-            ErrorDialog errorDialog = new ErrorDialog("Не найден файл \"" + loadPath.getText()
+            ErrorDialog errorDialog = new ErrorDialog("Не удалось прочитать статистику \"" + file.getName()
                     + "\".");
             errorDialog.showDialog();
             return;
         }
-        String tmpFileLocDir = new File(loadPath.getText()).getParentFile().getAbsolutePath();
-        stat = new Stat(res, tmpFileLocDir, false);
 
-        //---  Save files  ---//
-        String tmpDirPath = Main.StatDirPath + stat.hashCode();
-        stat.dir = tmpDirPath;
-        Files.createDirectory(Paths.get(tmpDirPath));
-        LocalDateTime creationTime = LocalDateTime.now();
-        FileWriter writer = new FileWriter(tmpDirPath + "/stat.json");
-        writer.write(res);
-        writer.close();
+        String tmpFileLocDir = file.getParentFile().getAbsolutePath();
+        stat = new Stat(res);
+        stat.save(res, tmpFileLocDir);
 
-        for (IntervalJson inter : stat.info.inter)
-        {
-            if (!Files.exists(Paths.get(tmpDirPath + '/' + inter.id.pname)))
-                try
-                {
-                    if (Files.exists(Paths.get(tmpFileLocDir + '/' + inter.id.pname)))
-                        Files.copy(Paths.get(tmpFileLocDir + '/' + inter.id.pname),
-                                Paths.get(tmpDirPath + '/' + inter.id.pname));
-                }
-                catch (Exception e)
-                {
-                    System.out.println("Could not copy file '" + inter.id.pname + "'");
-                }
-        }
-        AddStatToList(stat, dtf.format(creationTime));
+        AddStatToList(stat, dtf.format(LocalDateTime.now()));
     }
 
     @FXML public void deleteStat(){

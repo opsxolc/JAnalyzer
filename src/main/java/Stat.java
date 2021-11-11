@@ -1,8 +1,13 @@
-import com.sun.tools.corba.se.idl.ExceptionEntry;
+import json.IntervalJson;
 import json.StatJson;
 import json.UseStatJson;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,7 +32,7 @@ public class Stat implements Cloneable, Comparable<Stat>{
             System.out.println("Couldn't clone Stat");
             return null;
         }
-        res.info = info;
+        res.info = info; // TODO: clone
         res.interval = interval.clone();
         res.dir = dir;
         return res;
@@ -45,9 +50,18 @@ public class Stat implements Cloneable, Comparable<Stat>{
         interval = new Interval(info.inter, dir, withText);
     }
 
+    public Stat(String stat){
+        info = UseStatJson.GetStat(stat);
+        interval = new Interval(info.inter, dir, false);
+    }
+
     public String getHeader(){
         return interval.info.id.pname + "  |  " + info.p_heading + "  |  "
                 + String.format("%.3f", interval.info.times.exec_time) + "s";
+    }
+
+    private void updateInterval(){
+        interval = new Interval(info.inter, dir, false);
     }
 
     public static void cutIntervals(List<List<Interval>> statsIntervals){
@@ -118,6 +132,73 @@ public class Stat implements Cloneable, Comparable<Stat>{
     @Override
     public String toString() {
         return getHeader() + "\n" + interval.toString();
+    }
+
+    public void save(String statText, String fileLocDir) throws IOException {
+        dir = Main.StatDirPath + this.hashCode();
+        Files.createDirectory(Paths.get(dir));
+
+        FileWriter writer = new FileWriter(dir + "/stat.json");
+        writer.write(statText);
+        writer.close();
+
+        if (fileLocDir.equals(""))
+            return;
+
+        for (IntervalJson inter : this.info.inter)
+        {
+            if (!Files.exists(Paths.get(dir + '/' + inter.id.pname)))
+                try
+                {
+                    if (Files.exists(Paths.get(fileLocDir + '/' + inter.id.pname)))
+                        Files.copy(Paths.get(fileLocDir + '/' + inter.id.pname),
+                                Paths.get(dir + '/' + inter.id.pname));
+                }
+                catch (Exception e)
+                {
+                    System.out.println("Could not copy file '" + inter.id.pname + "'");
+                }
+        }
+    }
+
+    public void parseMulti(List<File> files) throws Exception {
+        if (files.size() <= 1)
+            throw new Exception("Illegal files count");
+
+        ArrayList<Stat> stats = new ArrayList<>(files.size() - 1);
+        for (int i = 0; i < files.size() - 1; ++i)
+            stats.add(new Stat());
+
+        for (File f : files) {
+            int index = Integer.parseInt(f.getName().replaceAll("[\\D]", ""));
+            if (index < 0 || index > stats.size()) {
+                ErrorDialog errorDialog = new ErrorDialog("Невалидное имя статистики \"" + f.getName()
+                        + "\". \nНеобходимо, чтобы имя файла было вида sts_<rank>.gz+.");
+                errorDialog.showDialog();
+                return;
+            }
+
+            String res = LibraryImport.readStat(f.getAbsolutePath());
+            if (res == null) {
+                ErrorDialog errorDialog = new ErrorDialog("Не удалось прочитать статистику \"" + f.getName()
+                        + "\".");
+                errorDialog.showDialog();
+                return;
+            }
+
+            if (index == 0) {
+                info = UseStatJson.GetStat(res);
+                continue;
+            }
+
+            stats.set(index - 1, new Stat(res));
+        }
+
+        info.is_multi = true;
+        info.unionWithStats(stats.stream().map(a -> a.info).collect(Collectors.toList()));
+        updateInterval();
+
+        save(UseStatJson.GetJson(info), "");
     }
 
     //    public Stat(File path, boolean withText)

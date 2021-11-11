@@ -623,7 +623,7 @@ VBox > .split-menu-button.last > .arrow-button {
 
 .progress-bar.success > .bar {
     -fx-background-insets: 0;
-    -fx-background-color: #5cb85c;
+    -fx-background-color: #b7d48b;
 }
 
 .progress-bar.info > .bar {
@@ -633,12 +633,12 @@ VBox > .split-menu-button.last > .arrow-button {
 
 .progress-bar.warning > .bar {
     -fx-background-insets: 0;
-    -fx-background-color: #f0ad4e
+    -fx-background-color: #e5bf8a
 }
 
 .progress-bar.danger > .bar {
     -fx-background-insets: 0;
-    -fx-background-color: #d9534f;
+    -fx-background-color: #d6827d;
 }
 
 .tooltip {

@@ -32,9 +32,9 @@
 <tabs>
     <Tab fx:id="loadStatsTab" closable="false" text="Загрузка">
         <AnchorPane>
-            <TextField fx:id="loadPath" layoutX="14.0" layoutY="7.0" prefHeight="27.0" prefWidth="529.0" promptText="Enter full path to sts.gz+ file" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="112.0" AnchorPane.topAnchor="9.0" />
+            <TextField fx:id="loadPath" layoutX="14.0" layoutY="7.0" prefHeight="27.0" prefWidth="529.0" promptText="Enter full path to sts.gz+ file" visible="false" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="112.0" AnchorPane.topAnchor="9.0" />
             <Button fx:id="saveStatButton" layoutX="552.0" layoutY="10.0" onAction="#saveStat" prefHeight="20.0" prefWidth="89.0" text="Импорт" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="10.0" />
-            <TableView fx:id="statTableView" layoutX="14.0" layoutY="50.0" pickOnBounds="false" prefHeight="402.0" prefWidth="529.0" style="-fx-border-radius: 5; -fx-background-color: transparent;" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="112.0" AnchorPane.topAnchor="45.0">
+            <TableView fx:id="statTableView" layoutX="14.0" layoutY="11.0" pickOnBounds="false" prefHeight="451.0" prefWidth="529.0" style="-fx-border-radius: 5; -fx-background-color: transparent;" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="112.0" AnchorPane.topAnchor="11.0">
               <columns>
                 <TableColumn prefWidth="191.0" text="Статистика выполнения" />
                 <TableColumn minWidth="0.0" prefWidth="287.0" text="Дата загрузки" />
@@ -42,7 +42,7 @@
             </TableView>
             <Button fx:id="loadStatButton" layoutX="552.0" layoutY="45.0" onAction="#loadStat" prefWidth="89.0" text="Анализ" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="45.0" />
             <Button fx:id="compareButton" layoutX="552.0" layoutY="80.0" onAction="#compareStats" prefWidth="89.0" text="Сравнить" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="80.0" />
-            <Button fx:id="deleteButton" layoutX="552.0" layoutY="115.0" onAction="#deleteStat" prefWidth="89.0" text="Удалить" visible="false" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="115.0" />
+            <Button fx:id="deleteButton" layoutX="552.0" layoutY="115.0" onAction="#deleteStat" prefWidth="89.0" text="Удалить" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="115.0" />
         </AnchorPane>
     </Tab>
     <Tab fx:id="showStatTab" closable="false" text="Анализ">

@@ -32,7 +32,7 @@ public class Main extends Application {
         scene.getStylesheets().add("progressBar.css");
         primaryStage.setScene(scene);
 //        primaryStage.getIcons().add(new Image("/icon.png"));
-        ((Controller)loader.getController()).initController();
+        ((Controller)loader.getController()).initController(primaryStage);
         primaryStage.show();
     }
 
