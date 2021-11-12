@@ -6,7 +6,6 @@
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.chart.StackedBarChart?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.CheckMenuItem?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
@@ -116,14 +115,9 @@
             <ToggleButton fx:id="procAnalysisButton" layoutX="440.0" layoutY="9.0" mnemonicParsing="false" onAction="#procAnalysis" text="Попроцессорно" AnchorPane.rightAnchor="102.5" AnchorPane.topAnchor="8.0" />
             <MenuButton fx:id="filterMenuButton" layoutX="350.0" layoutY="8.0" mnemonicParsing="false" text="Фильтр" AnchorPane.rightAnchor="224.0" AnchorPane.topAnchor="8.0">
               <items>
-                  <Menu mnemonicParsing="false" text="Только значимые">
-                    <items>
-                        <CheckMenuItem fx:id="filterExecSignificantIntervalsItem" mnemonicParsing="false" onAction="#filterExecSignificantIntervals" text="Время выполнения" />
-                        <CheckMenuItem fx:id="filterLostSignificantIntervalsItem" mnemonicParsing="false" onAction="#filterLostSignificantIntervals" text="Потерянное время" />
-                    </items>
-                  </Menu>
+                  <Menu fx:id="significantMenu" mnemonicParsing="false" text="Только значимые" />
                   <SeparatorMenuItem mnemonicParsing="false" />
-                  <MenuItem mnemonicParsing="false" onAction="#resetFilter" text="Сброс" />
+                  <MenuItem mnemonicParsing="false" onAction="#resetFilters" text="Сброс" />
               </items>
             </MenuButton>
         </AnchorPane>

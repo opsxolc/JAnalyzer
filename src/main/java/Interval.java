@@ -115,6 +115,9 @@ public class Interval implements Cloneable {
     }
 
     public String getGradient(double timeLost){
+        if (info.times.lost_time <= info.times.sys_time * 0.05)
+            return "";
+
         String result = "-fx-background-color: linear-gradient(to right, transparent, transparent";
         if (info.times.comm >= timeLost * 0.15)
             result += ", rgb(173, 255, 47)";

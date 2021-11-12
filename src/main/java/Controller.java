@@ -28,6 +28,8 @@ import json.IntervalJson;
 import json.ProcTimesJson;
 import org.apache.commons.io.FileUtils;
 import org.controlsfx.control.PopOver;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -40,12 +42,18 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Controller {
+
+    //-----  STATIC SECTION  -----//
+    public static ArrayList<Stat> compareList = new ArrayList<>();
+    public static double significantLostTimeCoef = 0.05;
 
     @FXML private TabPane tabPane;
     @FXML private TextArea statIntervalText;
@@ -74,9 +82,31 @@ public class Controller {
     private Window primaryStage;
 
     //----  Filter menu  -----//
-    @FXML private MenuButton filterMenuButton;
-    @FXML private CheckMenuItem filterExecSignificantIntervalsItem;
-    @FXML private CheckMenuItem filterLostSignificantIntervalsItem;
+//    @FXML private MenuButton filterMenuButton;
+    @FXML private Menu significantMenu;
+    private final HashMap<String, Supplier<Predicate<Interval>>> significantFilterNameToPred =
+            new HashMap<String, Supplier<Predicate<Interval>>>() {{
+        put("Время выполнения", () -> {
+            Interval rootInterval = getStatTreeRootInterval();
+            if (rootInterval == null)
+                return Filter.truePredicate;
+            return interval -> interval.info.times.exec_time >= 0.05 * rootInterval.info.times.exec_time;
+        });
+        put("Потерянное время", () -> {
+            Interval rootInterval = getStatTreeRootInterval();
+            if (rootInterval == null)
+                return Filter.truePredicate;
+            return interval -> interval.info.times.lost_time >= 0.05 * rootInterval.info.times.lost_time;
+        });
+    }};
+    private final int numSignificantFilters = significantFilterNameToPred.size();
+
+    private ArrayList<Filter> significantFilters;
+
+    public List<Filter> getFilters(){
+        // TODO: if any new filters add here
+        return significantFilters;
+    }
 
     enum CompareType {
         lostTime,
@@ -97,7 +127,6 @@ public class Controller {
     private double lostCompareTime = 0;
 //    private double GPUCompareTime = 0;
     private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-    public static ArrayList<Stat> compareList = new ArrayList<>();
     public CompareType curCompareType = CompareType.lostTime;
     public Integer curProc = -1;
 
@@ -120,6 +149,7 @@ public class Controller {
     public void initController(Window primaryStage) {
         this.primaryStage = primaryStage;
 
+        initFilters();
         initStatTable();
         resetLoadedStat();
         resetCompareStat();
@@ -127,6 +157,20 @@ public class Controller {
         initCompareTypeChoiceBox();
         initStatAnalysisTable();
         initFileChooser();
+    }
+
+    public void initFilters() {
+        significantFilters = new ArrayList<>(numSignificantFilters);
+        List<String> significantFiltersNames = new ArrayList<>(significantFilterNameToPred.keySet());
+        String filterName;
+
+        for (int i = 0; i < numSignificantFilters; ++i) {
+            filterName = significantFiltersNames.get(i);
+            significantFilters.add(
+                    new Filter(this, filterName, significantFilterNameToPred.get(filterName))
+            );
+        }
+        significantMenu.getItems().addAll(significantFilters);
     }
 
     private void initCompareTypeChoiceBox() {
@@ -219,37 +263,13 @@ public class Controller {
                     Interval o1 = selectedIntervals.get(i), o2 = selectedIntervals.get(j);
                     switch (typeCompare) {
                         case numProcSort:
-                            if (o1.info.times.nproc - o2.info.times.nproc > 0) {
-                                return 1;
-                            }
-                            if (o1.info.times.nproc - o2.info.times.nproc < 0) {
-                                return -1;
-                            }
-                            return 0;
+                            return (int) Math.signum(o1.info.times.nproc - o2.info.times.nproc);
                         case lostTimeSort:
-                            if (o1.info.times.lost_time - o2.info.times.lost_time > 0) {
-                                return 1;
-                            }
-                            if (o1.info.times.lost_time - o2.info.times.lost_time < 0) {
-                                return -1;
-                            }
-                            return 0;
+                            return (int) Math.signum(o1.info.times.lost_time - o2.info.times.lost_time);
                         case execTimeSort:
-                            if (o1.info.times.exec_time - o2.info.times.exec_time > 0) {
-                                return 1;
-                            }
-                            if (o1.info.times.exec_time - o2.info.times.exec_time < 0) {
-                                return -1;
-                            }
-                            return 0;
+                            return (int) Math.signum(o1.info.times.exec_time - o2.info.times.exec_time);
                         case coefSort:
-                            if (o1.info.times.efficiency - o2.info.times.efficiency > 0) {
-                                return 1;
-                            }
-                            if (o1.info.times.efficiency - o2.info.times.efficiency < 0) {
-                                return -1;
-                            }
-                            return 0;
+                            return (int) Math.signum(o1.info.times.efficiency - o2.info.times.efficiency);
                     }
                     return 0;
                 })
@@ -586,6 +606,7 @@ public class Controller {
         initAnalysis(inter);
     }
 
+    // TODO: вынести в отдельный класс, наследующийся от TreeView
     private void initAnalysis(Interval inter) {
         Paint effColor = Color.GREEN;
         if (inter.info.times.efficiency <= 0.5)
@@ -644,12 +665,13 @@ public class Controller {
         treeItems.get(2).expandedProperty().addListener((observable, oldValue, newValue) -> addBlink(treeItems.get(2)));
         treeItems.get(0).expandedProperty().addListener((observable, oldValue, newValue) -> addBlink(treeItems.get(0)));
 
-        treeItems.get(0).setExpanded(true);
+        if (inter.info.times.lost_time > significantLostTimeCoef * inter.info.times.sys_time)
+            treeItems.get(0).setExpanded(true);
     }
 
     //-----  Analysis END  -----//
 
-    private void initStatTree(Interval rootInterval) {
+    public void initStatTree(Interval rootInterval) {
         lostTime = rootInterval.info.times.lost_time;
         TreeItem<IntervalPane> root;
 
@@ -675,6 +697,12 @@ public class Controller {
         });
 
         statTreeView.getSelectionModel().select(0);
+    }
+
+    public void updateFilters(){
+        // Significant filters
+        for (Filter filter : significantFilters)
+            filter.setPredicateFilter(significantFilterNameToPred.get(filter.getText()).get());
     }
 
     private void initStat(@org.jetbrains.annotations.NotNull Stat stat) throws Exception{
@@ -850,53 +878,23 @@ public class Controller {
         selectTab(2);
     }
 
-    Predicate<Interval> truePredicate = t -> true, predExec = truePredicate, predLost = truePredicate;
-
-    @FXML public void filterExecSignificantIntervals(){
-        Interval rootInterval = statTreeView.getRoot().getValue().getInterval();
-
-        if (filterExecSignificantIntervalsItem.isSelected()) {
-            double p = 0.05; // more then 5% of execution time
-            double full_time = rootInterval.info.times.exec_time;
-            predExec = inter -> inter.info.times.exec_time >= p * full_time;
-        } else {
-            predExec = truePredicate;
-        }
-
-        Filter.filter(rootInterval, predLost.and(predExec));
-
-        initStatTree(rootInterval);
-    }
-
-    @FXML public void filterLostSignificantIntervals(){
-        Interval rootInterval = statTreeView.getRoot().getValue().getInterval();
-
-        if (filterLostSignificantIntervalsItem.isSelected()) {
-            double p = 0.05; // more then 5% of lost time
-            double full_time = rootInterval.info.times.lost_time;
-            predLost = inter -> inter.info.times.lost_time >= p * full_time;
-        } else {
-            predLost = truePredicate;
-        }
-
-        Filter.filter(rootInterval, predLost.and(predExec));
-
-        initStatTree(rootInterval);
+    public Interval getStatTreeRootInterval() {
+        if (statTreeView.getRoot() != null)
+            return statTreeView.getRoot().getValue().getInterval();
+        return null;
     }
 
     //------------  RESET SECTION  ------------//
 
-    @FXML public void resetFilter(){
+    @FXML public void resetFilters(){
         //-----  Deselect all filter CheckMenuItems  -----//
-        filterExecSignificantIntervalsItem.setSelected(false);
-        filterLostSignificantIntervalsItem.setSelected(false);
-
-        if (statTreeView.getRoot() != null) {
-            Interval rootInterval = statTreeView.getRoot().getValue().getInterval();
-
-            Filter.reset(rootInterval);
-            initStatTree(rootInterval);
+        for (Filter filter : significantFilters) {
+            filter.setSelected(false);
         }
+
+        Interval rootInterval = getStatTreeRootInterval();
+        if (rootInterval != null)
+            Filter.resetAllFilters(rootInterval);
     }
 
     private void resetCompareTypeChoiceBox() {
@@ -915,6 +913,7 @@ public class Controller {
     }
 
     @FXML public void resetLoadedStat() {
+        resetFilters();
         SplitPane.setResizableWithParent(statSplitPane.getItems().get(0), false);
         SplitPane.setResizableWithParent(statSplitPane.getItems().get(1), true);
         SplitPane.setResizableWithParent(statSplitPane.getItems().get(2), false);
@@ -924,8 +923,6 @@ public class Controller {
         statIntervalText.setText("");
         statChart.getData().clear();
         statTreeView.setRoot(null);
-        statSplitPane.setDividerPositions(0, 1);
-        resetFilter();
         setDisableLoadedStat(true);
         selectTab(0);
     }
@@ -986,7 +983,8 @@ public class Controller {
     @FXML public void saveStat() throws Exception{
         List<File> files = fileChooser.showOpenMultipleDialog(primaryStage);
 
-        File file = files.get(0);
+        if (files.isEmpty())
+            return;
 
         Stat stat;
 
@@ -1001,6 +999,8 @@ public class Controller {
             AddStatToList(stat, dtf.format(LocalDateTime.now()));
             return;
         }
+
+        File file = files.get(0);
 
         String res = LibraryImport.readStat(file.getAbsolutePath());
         if (res == null) {

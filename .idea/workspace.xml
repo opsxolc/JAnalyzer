@@ -7,14 +7,8 @@
     <list default="true" id="dc13690a-8505-4755-b0fa-dd824a8ba943" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Controller.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Stat.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Stat.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/StatRow.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/StatRow.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/json/ColOpJson.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/json/ColOpJson.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/json/InterTimesJson.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/json/InterTimesJson.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/json/IntervalJson.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/json/IntervalJson.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/json/StatJson.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/json/StatJson.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/bootstrap3.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/bootstrap3.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Filter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Filter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Interval.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Interval.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/main.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/main.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -130,7 +124,7 @@
       <workItem from="1634301674157" duration="8261000" />
       <workItem from="1634910716081" duration="3306000" />
       <workItem from="1635513386503" duration="2261000" />
-      <workItem from="1636555950134" duration="9524000" />
+      <workItem from="1636555950134" duration="20090000" />
     </task>
     <servers />
   </component>
