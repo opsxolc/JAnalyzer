@@ -27,7 +27,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
 
-<TabPane fx:id="tabPane" prefHeight="515.0" prefWidth="655.0" stylesheets="@bootstrap3.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
+<TabPane fx:id="tabPane" prefHeight="559.0" prefWidth="694.0" stylesheets="@bootstrap3.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
 <tabs>
     <Tab fx:id="loadStatsTab" closable="false" text="Загрузка">
         <AnchorPane>
@@ -46,19 +46,19 @@
     </Tab>
     <Tab fx:id="showStatTab" closable="false" text="Анализ">
         <AnchorPane prefHeight="436.0" prefWidth="655.0">
-            <SplitPane fx:id="statSplitPane" dividerPositions="0.5375191424196019, 0.8545176110260337" layoutY="47.0" scaleShape="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="47.0">
+            <SplitPane fx:id="statSplitPane" dividerPositions="0.7904624277456648, 0.9942196531791907" layoutY="47.0" scaleShape="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="47.0">
                 <items>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                         <children>
-                        <SplitPane fx:id="GPUSplitPane" dividerPositions="0.6670520231213873" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" style="-fx-background-color: transparent;" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <SplitPane fx:id="GPUSplitPane" dividerPositions="0.6670520231213873" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" style="-fx-background-color: transparent;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                           <items>
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                                  <children>
                                     <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="ALWAYS" minHeight="-Infinity" minWidth="-Infinity" style="-fx-background-color: transparent;" vbarPolicy="ALWAYS" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                        <content>
-                                          <AnchorPane minHeight="-Infinity" minWidth="-Infinity">
+                                          <AnchorPane fx:id="statChartAnchorPane" minHeight="-Infinity" minWidth="-Infinity">
                                              <children>
-                                                    <StackedBarChart fx:id="statChart" alternativeRowFillVisible="false" animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" stylesheets="@series.css" title="Потерянное время" verticalGridLinesVisible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                    <StackedBarChart alternativeRowFillVisible="false" animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" stylesheets="@series.css" title="Потерянное время" verticalGridLinesVisible="false" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                         <xAxis>
                                                             <CategoryAxis label="Процессоры" side="BOTTOM" />
                                                         </xAxis>
@@ -93,8 +93,8 @@
                               <Insets />
                            </opaqueInsets>
                         </SplitPane>
-                        <TreeView fx:id="statAnalysisView" layoutX="8.0" layoutY="16.0" prefHeight="411.0" prefWidth="347.0" showRoot="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="17.0" />
-                        <Label fx:id="characteristicLabel" alignment="CENTER" layoutX="105.0" layoutY="6.0" styleClass="column-header" text="Общие характеристики" textAlignment="CENTER" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                        <TreeView fx:id="statAnalysisView" layoutX="8.0" layoutY="16.0" prefHeight="411.0" prefWidth="347.0" showRoot="false" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="17.0" />
+                        <Label fx:id="characteristicLabel" alignment="CENTER" layoutX="105.0" layoutY="6.0" styleClass="column-header" text="Общие характеристики" textAlignment="CENTER" visible="false" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                         </children>
                     </AnchorPane>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="208.0" SplitPane.resizableWithParent="false">
@@ -110,7 +110,7 @@
                     </AnchorPane>
                 </items>
             </SplitPane>
-            <Label fx:id="statLabel" layoutX="14.0" layoutY="14.0" prefHeight="17.0" prefWidth="410.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="231.0" AnchorPane.topAnchor="14.0" />
+            <Label fx:id="statLabel" layoutX="14.0" layoutY="14.0" prefHeight="17.0" prefWidth="236.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="444.0" AnchorPane.topAnchor="14.0" />
             <Button fx:id="resetStatButton" layoutX="562.0" layoutY="8.0" mnemonicParsing="false" onAction="#resetLoadedStat" prefHeight="4.0" prefWidth="79.0" text="Сброс" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="8.0" />
             <ToggleButton fx:id="procAnalysisButton" layoutX="440.0" layoutY="9.0" mnemonicParsing="false" onAction="#procAnalysis" text="Попроцессорно" AnchorPane.rightAnchor="102.5" AnchorPane.topAnchor="8.0" />
             <MenuButton fx:id="filterMenuButton" layoutX="350.0" layoutY="8.0" mnemonicParsing="false" text="Фильтр" AnchorPane.rightAnchor="224.0" AnchorPane.topAnchor="8.0">

@@ -5,10 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="dc13690a-8505-4755-b0fa-dd824a8ba943" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/ChooseProcButton.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/StatChart.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Controller.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Filter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Filter.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/Interval.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Interval.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/json/IntervalJson.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/json/IntervalJson.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/main.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/main.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -71,17 +73,6 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
-      <option name="arquillianRunConfiguration">
-        <value>
-          <option name="containerStateName" value="" />
-        </value>
-      </option>
-      <option name="TEST_OBJECT" value="class" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Application.Main" />
@@ -124,7 +115,13 @@
       <workItem from="1634301674157" duration="8261000" />
       <workItem from="1634910716081" duration="3306000" />
       <workItem from="1635513386503" duration="2261000" />
-      <workItem from="1636555950134" duration="20090000" />
+      <workItem from="1636555950134" duration="21066000" />
+      <workItem from="1637924608802" duration="3751000" />
+      <workItem from="1637936561983" duration="3085000" />
+      <workItem from="1638540299789" duration="2494000" />
+      <workItem from="1639429380773" duration="133000" />
+      <workItem from="1639739564199" duration="8657000" />
+      <workItem from="1640251959567" duration="4137000" />
     </task>
     <servers />
   </component>

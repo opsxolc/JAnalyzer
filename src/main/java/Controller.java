@@ -7,14 +7,13 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.StackedBarChart;
-import javafx.scene.chart.XYChart;
+import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -31,6 +30,7 @@ import org.controlsfx.control.PopOver;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.text.Style;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -56,6 +56,7 @@ public class Controller {
     public static double significantLostTimeCoef = 0.05;
 
     @FXML private TabPane tabPane;
+    @FXML private Tab showStatTab;
     @FXML private TextArea statIntervalText;
     @FXML private Label statLabel;
     @FXML private TreeView<IntervalPane> statTreeView;
@@ -63,7 +64,6 @@ public class Controller {
     @FXML private SplitPane compareSplitPane;
     @FXML private SplitPane statSplitPane;
     @FXML private TableView<StatRow> statTableView;
-    @FXML private StackedBarChart statChart;
     @FXML private StackedBarChart statCompareChart;
     @FXML private LineChart<String, Double> statCompareGPUChart;
     @FXML private MenuButton sortMenu;
@@ -78,11 +78,13 @@ public class Controller {
     @FXML private TreeView statAnalysisView;
     @FXML private Label characteristicLabel;
 
+    @FXML private AnchorPane statChartAnchorPane;
+    private StatChart statChart;
+
     private FileChooser fileChooser;
     private Window primaryStage;
 
     //----  Filter menu  -----//
-//    @FXML private MenuButton filterMenuButton;
     @FXML private Menu significantMenu;
     private final HashMap<String, Supplier<Predicate<Interval>>> significantFilterNameToPred =
             new HashMap<String, Supplier<Predicate<Interval>>>() {{
@@ -149,6 +151,8 @@ public class Controller {
     public void initController(Window primaryStage) {
         this.primaryStage = primaryStage;
 
+        initChooseProcButton();
+        initStatChart();
         initFilters();
         initStatTable();
         resetLoadedStat();
@@ -157,6 +161,20 @@ public class Controller {
         initCompareTypeChoiceBox();
         initStatAnalysisTable();
         initFileChooser();
+    }
+
+    public void initChooseProcButton(){
+        ChooseProcButton chooseProcButton = new ChooseProcButton();
+
+        try {
+            ((AnchorPane) showStatTab.getContent()).getChildren().add(chooseProcButton);
+        } catch (Exception e) {
+            System.out.println("[ERROR] in initChooseProcButton: " + e.toString());
+            return;
+        }
+
+        AnchorPane.setTopAnchor(chooseProcButton, 8.);
+        AnchorPane.setRightAnchor(chooseProcButton, 315.);
     }
 
     public void initFilters() {
@@ -193,6 +211,16 @@ public class Controller {
 
         fileChooser.setTitle("Выберите статистику(и) для загрузки");
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+    }
+
+    private void initStatChart() {
+        statChart = new StatChart(new CategoryAxis(), new NumberAxis(), this::resetProc, this::selectProc);
+        statChart.setAnimated(false);
+        statChartAnchorPane.getChildren().add(statChart);
+        AnchorPane.setTopAnchor(statChart, 0.);
+        AnchorPane.setBottomAnchor(statChart, 0.);
+        AnchorPane.setLeftAnchor(statChart, 0.);
+        AnchorPane.setRightAnchor(statChart, 0.);
     }
 
     private void initSortMenu() {
@@ -400,56 +428,9 @@ public class Controller {
         curProc = procNum;
     }
 
-    //-----  Initializes stacked bar chart for selected interval  -----//
-    private void initStatChart(Interval interval) {
-        XYChart.Series<String, Double> series1 = new XYChart.Series<>();
-        XYChart.Series<String, Double> series2 = new XYChart.Series<>();
-        XYChart.Series<String, Double> series3 = new XYChart.Series<>();
-        XYChart.Series<String, Double> series4 = new XYChart.Series<>();
-        series1.setName("Недостаточный параллелизм (sys)");
-        series2.setName("Недостаточный параллелизм (user)");
-        series3.setName("Простои");
-        series4.setName("Коммуникации");
-
-        List<ProcTimesJson> procTimes = interval.info.proc_times;
-
-        //-----  Init proc data  ------//
-        for (int i = 0; i < procTimes.size(); ++i) {
-            series1.getData().add(new XYChart.Data<>(Integer.toString(i + 1), procTimes.get(i).insuf_sys));
-            series2.getData().add(new XYChart.Data<>(Integer.toString(i + 1), procTimes.get(i).insuf_user));
-            series3.getData().add(new XYChart.Data<>(Integer.toString(i + 1), procTimes.get(i).idle));
-            series4.getData().add(new XYChart.Data<>(Integer.toString(i + 1), procTimes.get(i).comm));
-        }
-
-        statChart.getYAxis().setAutoRanging(interval.info.id.nlev == 0);
-        statChart.getYAxis().setTickMarkVisible(true);
-        statChart.getYAxis().setTickLabelsVisible(true);
-
-        statChart.getData().clear();
-        statChart.getData().addAll(series1, series2, series3, series4);
-
-        //-----  Display labels  -----//
-        for (int i = 0; i < procTimes.size(); ++i) {
-            displayLabelForData(series1.getData().get(i));
-            displayLabelForData(series2.getData().get(i));
-            displayLabelForData(series3.getData().get(i));
-            displayLabelForData(series4.getData().get(i));
-        }
-        statChart.setCategoryGap(20);
-
-        statChart.setOnMouseClicked(mouseEvent -> {
-            if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
-                if (mouseEvent.getClickCount() == 2) {
-                    Node node = mouseEvent.getPickResult().getIntersectedNode();
-                    Integer dataNum = findDataNum(node.getStyleClass());
-                    if (dataNum == null) {
-                        resetProc(true, true);
-                        return;
-                    }
-                    selectProc(dataNum);
-                }
-            }
-        });
+    //-----  Updates stacked bar chart for selected interval  -----//
+    private void updateStatChart(Interval interval) {
+        statChart.displayLostTime(interval);
     }
 
     //-----  Initializes compare chart based on active mode  -----//
@@ -574,7 +555,7 @@ public class Controller {
         if (inter == null) {
             return;
         }
-        initStatChart(inter);
+        updateStatChart(inter);
         selectProc(curProc);
     }
 
@@ -688,7 +669,7 @@ public class Controller {
                 .addListener((observable, oldValue, newValue) -> {
                     if (newValue != null) {
                         if (procAnalysisButton.isSelected()) {
-                            initStatChart(newValue.getValue().getInterval());
+                            updateStatChart(newValue.getValue().getInterval());
                             selectProc(curProc);
                         } else {
                             initAnalysis(newValue.getValue().getInterval());
@@ -707,6 +688,8 @@ public class Controller {
 
     private void initStat(@org.jetbrains.annotations.NotNull Stat stat) throws Exception{
         resetProc(true, true);
+        procAnalysisButton.setSelected(false);
+        showAnalysis();
 
         statLabel.setText(stat.getHeader());
 
@@ -847,16 +830,6 @@ public class Controller {
                 String json = Main.readFile(file.getAbsolutePath(), StandardCharsets.UTF_8);
                 Stat stat = new Stat(json, dir.getAbsolutePath(), false);
                 AddStatToList(stat, dtf.format(t));
-//                    List<Stat> stats = new ArrayList<>(files.length);
-//                    for (File file : files) {
-//                        int index = Integer.parseInt(file.getName().replaceAll("[\\D]", ""));
-//                        long cTime = ((FileTime) Files.getAttribute(file.toPath(), "creationTime")).toMillis();
-//                        ZonedDateTime t = Instant.ofEpochMilli(cTime).atZone(ZoneId.systemDefault());
-//                        creationTime = dtf.format(t);
-//                        String json = Main.readFile(file.getAbsolutePath(), StandardCharsets.UTF_8);
-//                        Stat stat = new Stat(json, dir.getAbsolutePath(), false, false);
-//                        stats.set(index, stat);
-//                    }
             } catch (Exception e){
                 System.out.println("Error occurred loading dir " + dir + ": " + e.toString());
             }
@@ -913,6 +886,7 @@ public class Controller {
     }
 
     @FXML public void resetLoadedStat() {
+        enableAnalysis();
         resetFilters();
         SplitPane.setResizableWithParent(statSplitPane.getItems().get(0), false);
         SplitPane.setResizableWithParent(statSplitPane.getItems().get(1), true);
@@ -983,7 +957,7 @@ public class Controller {
     @FXML public void saveStat() throws Exception{
         List<File> files = fileChooser.showOpenMultipleDialog(primaryStage);
 
-        if (files.isEmpty())
+        if (files == null || files.isEmpty())
             return;
 
         Stat stat;

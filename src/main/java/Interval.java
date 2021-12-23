@@ -3,11 +3,12 @@ import json.ProcTimesJson;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class Interval implements Cloneable {
     public List<Interval> intervals = new ArrayList<>();
-    public IntervalJson info;
+    public IntervalJson info = new IntervalJson();
     public String text = "";
     public boolean visible = true;
 
@@ -143,6 +144,17 @@ public class Interval implements Cloneable {
             result += ", rgb(255, 192, 203)";
         result += ")";
         return result;
+    }
+
+    public Interval getIntervalForProcs(Predicate<Integer> procPred) {
+        Interval inter = new Interval();
+        inter.info = info.getIntervalForProcs(procPred);
+        inter.intervals = new ArrayList<>();
+        for (Interval child : intervals) {
+            inter.intervals.add(child.getIntervalForProcs(procPred));
+        }
+
+        return inter;
     }
 
     @Override
