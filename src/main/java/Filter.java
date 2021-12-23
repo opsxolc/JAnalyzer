@@ -20,17 +20,7 @@ public class Filter extends CheckMenuItem {
             curFilter = (isSelected()) ? supplier.get() : truePredicate;
             Interval rootInterval = controller.getStatTreeRootInterval();
             execAllFilters(rootInterval, controller.getFilters());
-            controller.initStatTree(rootInterval);
-        });
-    }
-
-    public void setPredicateFilter(Predicate<Interval> predicateFilter) {
-
-        setOnAction(e -> {
-            curFilter = (isSelected()) ? predicateFilter : truePredicate;
-            Interval rootInterval = controller.getStatTreeRootInterval();
-            execAllFilters(rootInterval, controller.getFilters());
-            controller.initStatTree(rootInterval);
+            controller.initStatTree(rootInterval, false);
         });
     }
 

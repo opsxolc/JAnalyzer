@@ -2,7 +2,6 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
-import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -10,10 +9,8 @@ import javafx.scene.Node;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -27,14 +24,10 @@ import json.IntervalJson;
 import json.ProcTimesJson;
 import org.apache.commons.io.FileUtils;
 import org.controlsfx.control.PopOver;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import javax.swing.text.Style;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -42,7 +35,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.function.Function;
+import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -80,6 +73,8 @@ public class Controller {
 
     @FXML private AnchorPane statChartAnchorPane;
     private StatChart statChart;
+    ChooseProcButton chooseProcButton;
+    Interval fullRootInterval;
 
     private FileChooser fileChooser;
     private Window primaryStage;
@@ -164,7 +159,7 @@ public class Controller {
     }
 
     public void initChooseProcButton(){
-        ChooseProcButton chooseProcButton = new ChooseProcButton();
+        chooseProcButton = new ChooseProcButton(this::selectProcs, this::resetSelectProcs);
 
         try {
             ((AnchorPane) showStatTab.getContent()).getChildren().add(chooseProcButton);
@@ -393,13 +388,10 @@ public class Controller {
             resetProc(false, false);
             return;
         }
-
         resetProc(false, true);
-
         //-----  Set Divider Position  -----//
         if (GPUSplitPane.getDividerPositions()[0] > 0.98)
             GPUSplitPane.setDividerPosition(0, 0.66);
-
         //-----  Adjust chart style  -----//
         HashSet<Node> data = new HashSet<>(statChart.lookupAll(".chart-bar"));
         String dataName = ".data" + procNum;
@@ -418,14 +410,47 @@ public class Controller {
                 n.setStyle("-fx-background-color: #d5f5aa;");
             }
         }
-
         //-----  Adjust Scroll  -----//
 //        GPUScrollPane.setVvalue(0);
-
         //-----  Add GPU cards  -----//
         addGPUCards(interval.info.proc_times.get(procNum).gpu_times);
-
         curProc = procNum;
+    }
+
+    //-----  Select Processes from Stat and update intervalFilterProcs -----//
+    private void selectProcs() {
+        if (fullRootInterval == null)
+            return;
+
+        int selectedIndex = statTreeView.getSelectionModel().getSelectedIndex();
+
+        Interval interval = fullRootInterval.getIntervalForProcs(chooseProcButton.getChosenProcsPred());
+
+        try {
+            statTreeView.setRoot(getRootWithChildren(interval));
+        } catch (Exception e) {
+            System.out.println("[ERROR] error selecting processes: " + e);
+        }
+
+        statTreeView.getSelectionModel().select(selectedIndex);
+
+        // TODO: show current proc filter
+    }
+
+    private void resetSelectProcs(){
+        if (fullRootInterval == null)
+            return;
+
+        int selectedIndex = statTreeView.getSelectionModel().getSelectedIndex();
+
+        try {
+            statTreeView.setRoot(getRootWithChildren(fullRootInterval));
+        } catch (Exception e) {
+            System.out.println("[ERROR] error resetting processes selection: " + e);
+        }
+
+        Filter.execAllFilters(fullRootInterval, getFilters());
+        statTreeView.getSelectionModel().select(selectedIndex);
     }
 
     //-----  Updates stacked bar chart for selected interval  -----//
@@ -589,6 +614,11 @@ public class Controller {
 
     // TODO: вынести в отдельный класс, наследующийся от TreeView
     private void initAnalysis(Interval inter) {
+        if (inter == null) {
+            System.out.println("[WARN] null interval in initAnalysis");
+            return;
+        }
+
         Paint effColor = Color.GREEN;
         if (inter.info.times.efficiency <= 0.5)
             effColor = Color.RED;
@@ -607,7 +637,7 @@ public class Controller {
                 processors = new CharacteristicPane<>("Количество процессоров", inter.info.times.nproc),
                 threads = new CharacteristicPane<>("Общее количество нитей", inter.info.times.threadsOfAllProcs),
                 totalTime = new CharacteristicPane<>("Общее время", inter.info.times.sys_time),
-                prodTime = new CharacteristicPane<>("Полезное время", inter.info.times.prod),
+                prodTime = new CharacteristicPane<>("Полезное время", inter.info.times.prod_time),
                 lostTime = new CharacteristicPane<>("Потерянное время", inter.info.times.lost_time, lostColor),
                 insufParallelism = new CharacteristicPane<>("Неэффективный параллелизм", inter.info.times.insuf),
                 insufParallelismSys = new CharacteristicPane<>("Системный", inter.info.times.insuf_sys),
@@ -634,7 +664,7 @@ public class Controller {
         /* 5 */ new LabeledProgressBar(idleTime, inter.info.times.idle, inter.info.times.lost_time)
         );
 
-        List<TreeItem> treeItems = labelesPBs.stream().map(pb -> new TreeItem<>(pb)).collect(Collectors.toList());
+        List<TreeItem> treeItems = labelesPBs.stream().map(TreeItem::new).collect(Collectors.toList());
 
         treeItems.get(2).getChildren().addAll(treeItems.get(3), treeItems.get(4));
         treeItems.get(0).getChildren().addAll(treeItems.get(2), treeItems.get(1), treeItems.get(5));
@@ -652,16 +682,19 @@ public class Controller {
 
     //-----  Analysis END  -----//
 
-    public void initStatTree(Interval rootInterval) {
+    public void initStatTree(Interval rootInterval, boolean updateFullRoot) {
         lostTime = rootInterval.info.times.lost_time;
         TreeItem<IntervalPane> root;
 
         try {
             root = getRootWithChildren(rootInterval);
         } catch (Exception e) {
-            System.out.println("Error initializing Stat interval tree: " + e);
+            System.out.println("[ERROR] error initializing Stat interval tree: " + e);
             return;
         }
+
+        if (updateFullRoot)
+            fullRootInterval = rootInterval;
 
         statTreeView.setRoot(root);
         statTreeView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
@@ -680,13 +713,7 @@ public class Controller {
         statTreeView.getSelectionModel().select(0);
     }
 
-    public void updateFilters(){
-        // Significant filters
-        for (Filter filter : significantFilters)
-            filter.setPredicateFilter(significantFilterNameToPred.get(filter.getText()).get());
-    }
-
-    private void initStat(@org.jetbrains.annotations.NotNull Stat stat) throws Exception{
+    private void initStat(@org.jetbrains.annotations.NotNull Stat stat) {
         resetProc(true, true);
         procAnalysisButton.setSelected(false);
         showAnalysis();
@@ -694,7 +721,7 @@ public class Controller {
         statLabel.setText(stat.getHeader());
 
         //-----  Init tree  -----//
-        initStatTree(stat.interval);
+        initStatTree(stat.interval, true);
 
         //-----  Adjust style  -----//
         statSplitPane.setDividerPositions(statChart.getWidth() / statSplitPane.getWidth(), 1);
@@ -792,7 +819,7 @@ public class Controller {
     }
 
     //-----  Analyze chosen stat  -----//
-    @FXML public void loadStat() throws Exception{
+    @FXML public void loadStat() {
         int size = statTableView.getSelectionModel().getSelectedItems().size();
         if (size != 1){
             ErrorDialog errorDialog = new ErrorDialog("Пожалуйста, выберите одну статистику для загрузки.");
@@ -866,8 +893,10 @@ public class Controller {
         }
 
         Interval rootInterval = getStatTreeRootInterval();
-        if (rootInterval != null)
+        if (rootInterval != null) {
             Filter.resetAllFilters(rootInterval);
+            initStatTree(rootInterval, false);
+        }
     }
 
     private void resetCompareTypeChoiceBox() {

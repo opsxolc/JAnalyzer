@@ -3,6 +3,7 @@ import json.ProcTimesJson;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -146,10 +147,11 @@ public class Interval implements Cloneable {
         return result;
     }
 
-    public Interval getIntervalForProcs(Predicate<Integer> procPred) {
+    public Interval getIntervalForProcs(IntPredicate procPred) {
         Interval inter = new Interval();
         inter.info = info.getIntervalForProcs(procPred);
         inter.intervals = new ArrayList<>();
+        inter.visible = visible;
         for (Interval child : intervals) {
             inter.intervals.add(child.getIntervalForProcs(procPred));
         }

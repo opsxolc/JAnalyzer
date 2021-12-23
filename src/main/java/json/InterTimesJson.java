@@ -4,7 +4,7 @@ public class InterTimesJson {
     public double prod_cpu;
     public double prod_sys;
     public double prod_io;
-    public double prod;
+    public double prod_time;
     public double exec_time;
     public double sys_time;
     public double efficiency;
@@ -31,8 +31,8 @@ public class InterTimesJson {
         prod_cpu += times.prod_cpu;
         prod_sys += times.prod_sys;
         prod_io += times.prod_io;
-        prod += times.prod;
-        exec_time += times.exec_time;
+        prod_time += times.prod_time;
+        exec_time = Math.max(exec_time, times.exec_time);
         sys_time += times.sys_time;
         efficiency = (efficiency + times.efficiency) / 2; // average
         lost_time += times.lost_time;

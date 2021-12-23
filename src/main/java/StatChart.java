@@ -1,5 +1,3 @@
-import com.sun.org.apache.xpath.internal.functions.Function2Args;
-import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.chart.Axis;
 import javafx.scene.chart.StackedBarChart;

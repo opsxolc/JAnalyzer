@@ -1,29 +1,30 @@
-import javafx.scene.control.Button;
-import javafx.scene.control.CustomMenuItem;
-import javafx.scene.control.MenuButton;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
 
-import java.awt.*;
+import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
 public class ChooseProcButton extends MenuButton {
     private final TextField textField;
-    private Predicate<Integer> chosenProcsPred = t -> false;
+    private IntPredicate chosenProcsPred = p -> true;
+    Runnable selectProcs, resetSelectProcs;
 
-    public ChooseProcButton() {
+    public ChooseProcButton(Runnable selectProcs, Runnable resetSelectProcs) {
         super();
+
+        this.selectProcs = selectProcs;
+        this.resetSelectProcs = resetSelectProcs;
 
         setText("Выбор процесса(-ов)");
 
         Pane pane = new Pane();
         textField = new TextField();
-        textField.setPromptText("1, 4-5, 2k+1");
+        textField.setPromptText("1, 3-6"); // TODO: add 2k+1
         Button chooseButton = new Button("Выбрать");
 
         chooseButton.setOnAction(e -> {
             parseAndSetPred(textField.getText());
-            // TODO: update all
+            selectProcs.run();
         });
 
         pane.setPrefSize(188, 29);
@@ -38,7 +39,10 @@ public class ChooseProcButton extends MenuButton {
         CustomMenuItem chooseProcMenuItem = new CustomMenuItem();
         chooseProcMenuItem.setContent(pane);
 
-        this.getItems().add(chooseProcMenuItem);
+        MenuItem resetMenuItem = new MenuItem("Сброс");
+        resetMenuItem.setOnAction(e -> reset());
+
+        this.getItems().addAll(chooseProcMenuItem, new SeparatorMenuItem(), resetMenuItem);
     }
 
     private boolean isNumeric(String str) {
@@ -50,20 +54,24 @@ public class ChooseProcButton extends MenuButton {
     }
 
     private void parseAndSetPred(String text) {
-        chosenProcsPred = t -> false;
+        chosenProcsPred = p -> false;
         text = text.replaceAll(" ", "");
         String[] strings = text.split(",");
         for (String s : strings) {
             if (isNumeric(s)) {
-                chosenProcsPred = t -> chosenProcsPred.test(t) || t == Integer.parseInt(s);
+                chosenProcsPred = chosenProcsPred.or(p -> p == Integer.parseInt(s));
                 continue;
             }
 
             if (isRange(s)) {
                 String[] range = s.split("-");
-                if (range.length < 2) continue;
-                chosenProcsPred = t -> chosenProcsPred.test(t)
-                        || Integer.parseInt(range[0]) <= t || t <= Integer.parseInt(range[1]);
+                if (range.length != 2) {
+                    System.out.println("[WARN] invalid string in chooseProcs: " + s + "; length = " + range.length);
+                    continue;
+                }
+                chosenProcsPred = chosenProcsPred.or(
+                        p -> Integer.parseInt(range[0]) <= p && p <= Integer.parseInt(range[1])
+                );
                 continue;
             }
 
@@ -73,8 +81,14 @@ public class ChooseProcButton extends MenuButton {
 
     }
 
-    public Predicate<Integer> getChosenProcsPred(){
+    public IntPredicate getChosenProcsPred(){
         return chosenProcsPred;
+    }
+
+    public void reset(){
+        textField.clear();
+        chosenProcsPred = p -> true;
+        resetSelectProcs.run();
     }
 
 }
