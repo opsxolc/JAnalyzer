@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -161,37 +163,64 @@ public class Stat implements Cloneable, Comparable<Stat>{
         }
     }
 
+    private ErrorDialog notValid(String name)
+    {
+        return new ErrorDialog("Невалидное имя статистики \"" + name + "\".\n" +
+                               "Необходимо, чтобы имя файла было вида <name>_<rank>.gz+.");
+    }
+
     public void parseMulti(List<File> files) throws Exception {
         if (files.size() <= 1)
             throw new Exception("Illegal files count");
+
+        HashMap<String, File> names = new HashMap<>();
+        String base = "";
+        for (File f : files) {
+            String name = f.getName();
+            names.put(name, f);
+            int idx = name.lastIndexOf('_');
+            if (idx < 0 || idx >= name.length()) {
+                notValid(f.getName()).showDialog();
+                return;
+            }
+
+            if (base.length() == 0)
+                base = name.substring(0, idx);
+            else {
+                if (!base.equals(name.substring(0, idx))) {
+                    notValid(f.getName()).showDialog();
+                    return;
+                }
+            }
+        }
 
         ArrayList<Stat> stats = new ArrayList<>(files.size() - 1);
         for (int i = 0; i < files.size() - 1; ++i)
             stats.add(new Stat());
 
-        for (File f : files) {
-            int index = Integer.parseInt(f.getName().replaceAll("[\\D]", ""));
-            if (index < 0 || index > stats.size()) {
-                ErrorDialog errorDialog = new ErrorDialog("Невалидное имя статистики \"" + f.getName()
-                        + "\". \nНеобходимо, чтобы имя файла было вида sts_<rank>.gz+.");
-                errorDialog.showDialog();
+        for (int z = 0; z < files.size(); ++z) {
+            String key = base + "_" + z + ".gz+";
+            if (!names.containsKey(key)){
+                notValid(key).showDialog();
                 return;
             }
 
-            String res = LibraryImport.readStat(f.getAbsolutePath());
+            String res = null;
+            if (Main.ois != null && Main.oos != null)
+                res = Main.readStat(names.get(key).getAbsolutePath());
+            else
+                res = LibraryImport.readStat(names.get(key).getAbsolutePath());
+
             if (res == null) {
-                ErrorDialog errorDialog = new ErrorDialog("Не удалось прочитать статистику \"" + f.getName()
-                        + "\".");
+                ErrorDialog errorDialog = new ErrorDialog("Не удалось прочитать статистику \"" + names.get(key).getName() + "\".");
                 errorDialog.showDialog();
                 return;
             }
 
-            if (index == 0) {
+            if (z == 0)
                 info = UseStatJson.GetStat(res);
-                continue;
-            }
-
-            stats.set(index - 1, new Stat(res));
+            else
+                stats.set(z - 1, new Stat(res));
         }
 
         info.is_multi = true;
