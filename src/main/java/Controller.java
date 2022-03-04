@@ -20,8 +20,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import javafx.util.Duration;
 import json.GPUTimesJson;
-import json.IntervalJson;
-import json.ProcTimesJson;
 import org.apache.commons.io.FileUtils;
 import org.controlsfx.control.PopOver;
 
@@ -35,7 +33,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -983,7 +980,7 @@ public class Controller {
         }
     }
 
-    @FXML public void saveStat() throws Exception{
+    @FXML public void saveStat() throws Exception {
         List<File> files = fileChooser.showOpenMultipleDialog(primaryStage);
 
         if (files == null || files.isEmpty())
@@ -1005,10 +1002,13 @@ public class Controller {
 
         File file = files.get(0);
 
-        String res = LibraryImport.readStat(file.getAbsolutePath());
+        String res = null;
+        if (Main.ois != null && Main.oos != null)
+            res = Main.readStat(file.getAbsolutePath());
+        else
+            res = LibraryImport.readStat(file.getAbsolutePath());
         if (res == null) {
-            ErrorDialog errorDialog = new ErrorDialog("Не удалось прочитать статистику \"" + file.getName()
-                    + "\".");
+            ErrorDialog errorDialog = new ErrorDialog("Не удалось прочитать статистику \"" + file.getName() + "\".");
             errorDialog.showDialog();
             return;
         }
