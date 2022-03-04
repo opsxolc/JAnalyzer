@@ -25,7 +25,7 @@ public class ErrorDialog {
         stage = new Stage();
         scene.getStylesheets().add("bootstrap3.css");
         stage.setScene(scene);
-        stage.getIcons().add(new Image("/icon.png"));
+        stage.getIcons().add(new Image("/warr.png"));
         stage.setTitle("Ошибка");
         stage.initModality(Modality.APPLICATION_MODAL);
     }

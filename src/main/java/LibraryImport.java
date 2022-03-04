@@ -1,13 +1,7 @@
 public class LibraryImport {
-
-    public static native String readStat(String s);
-
-    public static void main(String[] args) {
-        System.out.println(LibraryImport.readStat("hello"));
-    }
-
+    public static native String readStat(String path);
     static {
-        String nativeLibPath = System.getProperty("user.dir") + "/src/main/resources/libLibraryImport.jnilib";
+        String nativeLibPath = System.getProperty("user.dir") + "/src/libLibraryImport.jnilib";
         try {
             System.load(nativeLibPath);
         }
@@ -15,5 +9,4 @@ public class LibraryImport {
             System.out.println("Error: cannot load library!");
         }
     }
-
 }

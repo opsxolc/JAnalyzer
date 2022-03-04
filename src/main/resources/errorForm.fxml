@@ -12,7 +12,7 @@
       <Label fx:id="errorLabel" layoutX="88.0" layoutY="14.0" prefHeight="61.0" prefWidth="211.0" text="Label" wrapText="true" AnchorPane.bottomAnchor="45.0" AnchorPane.leftAnchor="88.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0" />
       <ImageView fitHeight="65.0" fitWidth="65.0" layoutX="14.0" layoutY="28.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="27.0" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="28.0">
          <image>
-            <Image url="@icon.png" />
+            <Image url="@warr.png" />
          </image>
       </ImageView>
    </children>
