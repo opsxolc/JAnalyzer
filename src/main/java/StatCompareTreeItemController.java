@@ -2,7 +2,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 
 
-public class StatCompareTreeItem1Controller {
+public class StatCompareTreeItemController {
     @FXML private Label maxLabel;
     @FXML private Label minLabel;
     @FXML private Label maxTimeLabel;

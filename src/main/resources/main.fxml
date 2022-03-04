@@ -81,7 +81,8 @@
                                                 <VBox fx:id="GPUVBox" layoutY="-9.0" prefHeight="161.0" prefWidth="340.0" spacing="10.0" style="-fx-background-color: white; -fx-border-width: 0;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                    <padding>
                                                       <Insets bottom="10.0" left="10.0" right="10.0" top="5.0" />
-                                                   </padding></VBox>
+                                                   </padding>
+                                                </VBox>
                                              </children>
                                           </AnchorPane>
                                        </content>
@@ -93,8 +94,16 @@
                               <Insets />
                            </opaqueInsets>
                         </SplitPane>
-                        <TreeView fx:id="statAnalysisView" layoutX="8.0" layoutY="16.0" prefHeight="411.0" prefWidth="347.0" showRoot="false" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="17.0" />
-                        <Label fx:id="characteristicLabel" alignment="CENTER" layoutX="105.0" layoutY="6.0" styleClass="column-header" text="Общие характеристики" textAlignment="CENTER" visible="false" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                        <VBox fx:id="mainCharsVBox" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <children>
+                              <AnchorPane VBox.vgrow="NEVER">
+                                 <children>
+                                    <Label fx:id="characteristicLabel" alignment="CENTER" prefWidth="543.0" styleClass="column-header" text="Общие характеристики" textAlignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                 </children>
+                              </AnchorPane>
+                              <TreeView fx:id="statAnalysisView" prefHeight="411.0" prefWidth="347.0" showRoot="false" VBox.vgrow="ALWAYS" />
+                           </children>
+                        </VBox>
                         </children>
                     </AnchorPane>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="208.0" SplitPane.resizableWithParent="false">

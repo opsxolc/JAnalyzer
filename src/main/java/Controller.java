@@ -68,6 +68,8 @@ public class Controller {
     @FXML private SplitPane GPUSplitPane;
     @FXML private ScrollPane GPUScrollPane;
     @FXML private ToggleButton procAnalysisButton;
+
+    @FXML private VBox mainCharsVBox;
     @FXML private TreeView statAnalysisView;
     @FXML private Label characteristicLabel;
 
@@ -575,8 +577,8 @@ public class Controller {
 
     private void enableProcAnalysis() {
         Interval inter = getSelectedIntervalStat();
-        hideAnalysis();
-        showProcAnalysis();
+        setVisibleAnalysis(false);
+        setVisibleProcAnalysis(true);
         if (inter == null) {
             return;
         }
@@ -584,28 +586,18 @@ public class Controller {
         selectProc(curProc);
     }
 
-    private void showAnalysis() {
-        characteristicLabel.setVisible(true);
-        statAnalysisView.setVisible(true);
+    private void setVisibleAnalysis(boolean visible) {
+        mainCharsVBox.setVisible(visible);
     }
 
-    private void hideAnalysis() {
-        characteristicLabel.setVisible(false);
-        statAnalysisView.setVisible(false);
-    }
-
-    private void showProcAnalysis() {
-        GPUSplitPane.setVisible(true);
-    }
-
-    private void hideProcAnalysis() {
-        GPUSplitPane.setVisible(false);
+    private void setVisibleProcAnalysis(boolean visible) {
+        GPUSplitPane.setVisible(visible);
     }
 
     private void enableAnalysis() {
         Interval inter = getSelectedIntervalStat();
-        hideProcAnalysis();
-        showAnalysis();
+        setVisibleProcAnalysis(false);
+        setVisibleAnalysis(true);
         if (inter == null) {
             return;
         }
@@ -716,7 +708,7 @@ public class Controller {
     private void initStat(@org.jetbrains.annotations.NotNull Stat stat) {
         resetProc(true, true);
         procAnalysisButton.setSelected(false);
-        showAnalysis();
+        setVisibleAnalysis(true);
 
         statLabel.setText(stat.getHeader());
 
@@ -745,12 +737,12 @@ public class Controller {
         FXMLLoader fxmlLoader = new FXMLLoader();
         IntervalComparePane p;
         try {
-             p = new IntervalComparePane(fxmlLoader.load(getClass().getResource("statCompareTreeItem1.fxml").openStream()));
+             p = new IntervalComparePane(fxmlLoader.load(getClass().getResource("statCompareTreeItem.fxml").openStream()));
         } catch (Exception e) {
-            System.out.println("Error loading statCompareTreeItem1.fxml\n" + e.toString());
+            System.out.println("Error loading statCompareTreeItem.fxml\n" + e.toString());
             return null;
         }
-        StatCompareTreeItem1Controller controller = fxmlLoader.getController();
+        StatCompareTreeItemController controller = fxmlLoader.getController();
         int max_time_index = 0;
         int min_time_index = 0;
         for (int i = 0; i < intervals.size(); ++i) {
