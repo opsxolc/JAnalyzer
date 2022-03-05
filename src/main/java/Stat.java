@@ -181,7 +181,7 @@ public class Stat implements Cloneable, Comparable<Stat>{
             int idx = name.lastIndexOf('_');
             if (idx < 0 || idx >= name.length()) {
                 notValid(f.getName()).showDialog();
-                return;
+                throw new Exception("Invalid name: \"" + f.getName() + "\"");
             }
 
             if (base.length() == 0)
@@ -189,7 +189,7 @@ public class Stat implements Cloneable, Comparable<Stat>{
             else {
                 if (!base.equals(name.substring(0, idx))) {
                     notValid(f.getName()).showDialog();
-                    return;
+                    throw new Exception("Invalid name: \"" + f.getName() + "\"");
                 }
             }
         }
@@ -202,7 +202,7 @@ public class Stat implements Cloneable, Comparable<Stat>{
             String key = base + "_" + z + ".gz+";
             if (!names.containsKey(key)){
                 notValid(key).showDialog();
-                return;
+                throw new Exception("Not found file: \"" + key + "\"");
             }
 
             String res = null;
@@ -214,7 +214,7 @@ public class Stat implements Cloneable, Comparable<Stat>{
             if (res == null) {
                 ErrorDialog errorDialog = new ErrorDialog("Не удалось прочитать статистику \"" + names.get(key).getName() + "\".");
                 errorDialog.showDialog();
-                return;
+                throw new Exception("Error in readStat");
             }
 
             if (z == 0)
