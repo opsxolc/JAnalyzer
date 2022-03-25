@@ -1,3 +1,5 @@
+package Characteristics;
+
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -9,8 +11,6 @@ import javafx.scene.paint.Paint;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-
-import static java.awt.Color.black;
 
 public class CharacteristicPane<T> extends GridPane {
     private Characteristic characteristic;

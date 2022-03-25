@@ -1,10 +1,8 @@
 import json.IntervalJson;
-import json.ProcTimesJson;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntPredicate;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class Interval implements Cloneable {
@@ -133,8 +131,18 @@ public class Interval implements Cloneable {
         return result;
     }
 
+    public String getGradientGPU(double timeLostGPU){
+        if (info.times.gpu_num <= 0
+                || info.times.gpu_efficiency >= 0.7
+                || info.times.gpu_time_lost <= timeLostGPU * 0.05)
+            return "";
+
+        return "-fx-background-color: linear-gradient(to right, transparent, transparent, rgb(255, 216, 43))";
+    }
+
     public static String getCompareGradient(List<Interval> list, double timeLost){
         String result = "-fx-background-color: linear-gradient(to right, transparent, transparent";
+
         if (list.stream().mapToDouble(inter -> inter.info.times.comm).reduce(0, Double::sum) >= timeLost * 0.3)
             result += ", rgb(173, 255, 47)";
         if (list.stream().mapToDouble(inter -> inter.info.times.idle).reduce(0, Double::sum) >= timeLost * 0.3)
@@ -144,6 +152,10 @@ public class Interval implements Cloneable {
         if (list.stream().mapToDouble(inter -> inter.info.times.insuf_sys).reduce(0, Double::sum) >= timeLost * 0.3)
             result += ", rgb(255, 192, 203)";
         result += ")";
+
+        if (result.equals("-fx-background-color: linear-gradient(to right, transparent, transparent)"))
+            return "";
+
         return result;
     }
 

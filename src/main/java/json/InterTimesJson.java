@@ -27,6 +27,11 @@ public class InterTimesJson {
     public long nproc;
     public long threadsOfAllProcs;
 
+    // additional GPU accumulated metrics
+    public long gpu_num;
+    public double gpu_sys_time;
+    public double gpu_efficiency;
+
     public void addTimes(InterTimesJson times) {
         prod_cpu += times.prod_cpu;
         prod_sys += times.prod_sys;
@@ -53,5 +58,9 @@ public class InterTimesJson {
         gpu_time_lost += times.gpu_time_lost;
         nproc += times.nproc;
         threadsOfAllProcs += times.threadsOfAllProcs;
+
+        gpu_num += times.gpu_num;
+        gpu_sys_time += times.gpu_sys_time;
+        gpu_efficiency = (gpu_efficiency + times.gpu_efficiency) / 2; // average
     }
 }

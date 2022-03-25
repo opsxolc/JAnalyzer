@@ -94,16 +94,36 @@
                               <Insets />
                            </opaqueInsets>
                         </SplitPane>
-                        <VBox fx:id="mainCharsVBox" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <children>
-                              <AnchorPane VBox.vgrow="NEVER">
+                        <ScrollPane fx:id="mainCharsScrollPane" fitToWidth="true" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                          <content>
+                            <AnchorPane>
                                  <children>
-                                    <Label fx:id="characteristicLabel" alignment="CENTER" prefWidth="543.0" styleClass="column-header" text="Общие характеристики" textAlignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                    <VBox fx:id="mainCharsVBox" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                       <children>
+                                          <VBox VBox.vgrow="ALWAYS">
+                                             <children>
+                                                <AnchorPane VBox.vgrow="NEVER">
+                                                   <children>
+                                                      <Label fx:id="characteristicLabel" alignment="CENTER" styleClass="column-header" text="Общие характеристики" textAlignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                   </children>
+                                                </AnchorPane>
+                                             </children>
+                                          </VBox>
+                                          <VBox fx:id="mainCharsGPUVBox" VBox.vgrow="SOMETIMES">
+                                             <children>
+                                                <AnchorPane>
+                                                   <children>
+                                                      <Label alignment="CENTER" styleClass="column-header" text="Общие характеристики на GPU" textAlignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                   </children>
+                                                </AnchorPane>
+                                             </children>
+                                          </VBox>
+                                       </children>
+                                    </VBox>
                                  </children>
                               </AnchorPane>
-                              <TreeView fx:id="statAnalysisView" prefHeight="411.0" prefWidth="347.0" showRoot="false" VBox.vgrow="ALWAYS" />
-                           </children>
-                        </VBox>
+                          </content>
+                        </ScrollPane>
                         </children>
                     </AnchorPane>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="208.0" SplitPane.resizableWithParent="false">

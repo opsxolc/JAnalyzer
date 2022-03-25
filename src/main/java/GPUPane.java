@@ -57,26 +57,26 @@ public class GPUPane extends VBox {
     private static final int DVMHStatMetricCount =
             DVMHStatMetrics.DVMH_STAT_METRIC_FORCE_INT.ordinal();
     private static final String[] dvmhStatMetricsTitles = {
-        "Kernel executions",
-        "Copy GPU to CPU",
-        "Copy CPU to GPU",
-        "Copy GPU to GPU",
-        "[Shadow] Copy GPU to CPU",
-        "[Shadow] Copy CPU to GPU",
-        "[Shadow] Copy GPU to GPU",
-        "[Remote] Copy GPU to CPU",
-        "[Remote] Copy CPU to GPU",
-        "[Remote] Copy GPU to GPU",
-        "[Redistribution] Copy GPU to CPU",
-        "[Redistribution] Copy CPU to GPU",
-        "[Redistribution] Copy GPU to GPU",
-        "[Region IN] Copy GPU to CPU",
-        "[Region IN] Copy CPU to GPU",
-        "[Region IN] Copy GPU to GPU",
+        "Выполение ядер",
+        "Копирование с GPU на CPU",
+        "Копирование с CPU на GPU",
+        "Копирование с GPU на GPU",
+        "[Теневые грани] Копирование с GPU на CPU",
+        "[Теневые грани] Копирование с CPU на GPU",
+        "[Теневые грани] Копирование с GPU на GPU",
+        "[Remote] Копирование с GPU на CPU",
+        "[Remote] Копирование с CPU на GPU",
+        "[Remote] Копирование с GPU на GPU",
+        "[Перераспределение] Копирование с GPU на CPU",
+        "[Перераспределение] Копирование с CPU на GPU",
+        "[Перераспределение] Копирование с GPU на GPU",
+        "[Region IN] Копирование с GPU на CPU",
+        "[Region IN] Копирование с CPU на GPU",
+        "[Region IN] Копирование с GPU на GPU",
         "GET_ACTUAL",
-        "Loop execution",
-        "Data reorganization",
-        "Reduction",
+        "Выполнение циклов",
+        "Реорганизация данных",
+        "Редукция",
         "GPU Runtime compilation",
         "Page lock host memory"
     };
@@ -130,12 +130,12 @@ public class GPUPane extends VBox {
 
         //-----  Init labels  -----//
         gridPane.add(new Label("#"), 1, 0);
-        gridPane.add(new Label("min"), 2, 0);
-        gridPane.add(new Label("max"), 3, 0);
-        gridPane.add(new Label("Sum"), 4, 0);
-        gridPane.add(new Label("Average"), 5, 0);
-        gridPane.add(new Label("Productive"), 6, 0);
-        gridPane.add(new Label("Lost"), 7, 0);
+        gridPane.add(new Label("Минимум"), 2, 0);
+        gridPane.add(new Label("Максимум"), 3, 0);
+        gridPane.add(new Label("Сумма"), 4, 0);
+        gridPane.add(new Label("Среднее"), 5, 0);
+        gridPane.add(new Label("Полезное"), 6, 0);
+        gridPane.add(new Label("Потерянное"), 7, 0);
 
         getChildren().add(titleLabel);
         getChildren().add(gridPane);
@@ -188,8 +188,8 @@ public class GPUPane extends VBox {
 
         Label prodLabel = new Label(prepareValue(gpuTimes.prod_time, true, false, true, true));
         Label lostLabel = new Label(prepareValue(gpuTimes.lost_time, true, false, true, true));
-        prodLostPane.addRow(0, new Label("Productive time"), prodLabel);
-        prodLostPane.addRow(1, new Label("Lost time"), lostLabel);
+        prodLostPane.addRow(0, new Label("Полезное время"), prodLabel);
+        prodLostPane.addRow(1, new Label("Потерянное время"), lostLabel);
         GridPane.setHalignment(prodLabel, HPos.RIGHT);
         GridPane.setHalignment(lostLabel, HPos.RIGHT);
 

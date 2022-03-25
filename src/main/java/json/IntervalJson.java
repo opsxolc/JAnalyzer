@@ -2,9 +2,9 @@ package json;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.function.IntPredicate;
-import java.util.function.Predicate;
 
 public class IntervalJson
 {
@@ -72,6 +72,15 @@ public class IntervalJson
         times.gpu_time_lost = proc_times.stream().mapToDouble(p -> p.gpu_time_lost).sum();
         times.nproc = proc_times.size();
         times.threadsOfAllProcs = proc_times.stream().mapToLong(p -> (p.num_threads <= 0)?1:p.num_threads).sum();
+
+        calculateAdditionalMetrics();
+    }
+
+    public void calculateAdditionalMetrics(){
+        Optional<Long> gpu_num_opt = proc_times.stream().map(x->x.num_gpu).reduce(Long::sum);
+        times.gpu_num = gpu_num_opt.isPresent()?gpu_num_opt.get():0;
+        times.gpu_sys_time = times.gpu_time_lost + times.gpu_time_prod;
+        times.gpu_efficiency = times.gpu_time_prod / times.gpu_sys_time;
     }
 
 }

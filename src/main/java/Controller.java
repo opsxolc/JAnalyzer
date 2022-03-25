@@ -1,7 +1,5 @@
-import javafx.animation.Interpolator;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
+import Characteristics.CharacteristicPane;
+import Utils.Utils;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -13,12 +11,9 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-import javafx.util.Duration;
 import json.GPUTimesJson;
 import org.apache.commons.io.FileUtils;
 import org.controlsfx.control.PopOver;
@@ -39,11 +34,12 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static java.lang.System.exit;
+
 public class Controller {
 
     //-----  STATIC SECTION  -----//
     public static ArrayList<Stat> compareList = new ArrayList<>();
-    public static double significantLostTimeCoef = 0.05;
 
     @FXML private TabPane tabPane;
     @FXML private Tab showStatTab;
@@ -66,8 +62,11 @@ public class Controller {
     @FXML private ScrollPane GPUScrollPane;
     @FXML private ToggleButton procAnalysisButton;
 
+    @FXML private ScrollPane mainCharsScrollPane;
     @FXML private VBox mainCharsVBox;
-    @FXML private TreeView statAnalysisView;
+    @FXML private VBox mainCharsGPUVBox;
+    @FXML private CharacteristicsTreeView statAnalysisView;
+    @FXML private CharacteristicsTreeView statAnalysisGPUView;
     @FXML private Label characteristicLabel;
 
     @FXML private AnchorPane statChartAnchorPane;
@@ -120,6 +119,7 @@ public class Controller {
     Pattern pDataPart = Pattern.compile("default-color.");
 
     private double lostTime = 0;
+    private double lostTimeGPU = 0;
     private double lostCompareTime = 0;
 //    private double GPUCompareTime = 0;
     private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
@@ -145,16 +145,33 @@ public class Controller {
     public void initController(Window primaryStage) {
         this.primaryStage = primaryStage;
 
-        initChooseProcButton();
-        initStatChart();
-        initFilters();
-        initStatTable();
-        resetLoadedStat();
-        resetCompareStat();
-        initSortMenu();
-        initCompareTypeChoiceBox();
-        initStatAnalysisTable();
-        initFileChooser();
+        try {
+            initChooseProcButton();
+            initStatChart();
+            initFilters();
+            initStatTable();
+            resetLoadedStat();
+            resetCompareStat();
+            initSortMenu();
+            initCompareTypeChoiceBox();
+            initStatAnalysisViews();
+            initFileChooser();
+        } catch (Exception e) {
+            System.out.println("could not init main controller: " + e.toString());
+            exit(1);
+        }
+    }
+
+    private void initStatAnalysisViews() throws Exception{
+        statAnalysisView = new CharacteristicsTreeView();
+        try {
+            ((VBox) mainCharsVBox.getChildren().get(0)).getChildren().add(statAnalysisView);
+        } catch (Exception e) {
+            throw new Exception("error initializing statAnalysisView: " + e.toString());
+        }
+
+        statAnalysisGPUView = new CharacteristicsTreeView();
+        mainCharsGPUVBox.getChildren().add(statAnalysisGPUView);
     }
 
     public void initChooseProcButton(){
@@ -246,13 +263,6 @@ public class Controller {
         LoadStatList();
     }
 
-    private void initStatAnalysisTable() {
-        statAnalysisView.setShowRoot(false);
-
-        TreeItem<CharacteristicPane<?>> root = new TreeItem<>(new CharacteristicPane<>("root", "root"));
-        statAnalysisView.setRoot(root);
-    }
-
     //-----  INIT SECTION END  -----//
 
     private void switchCompareType(CompareType cType) {
@@ -303,20 +313,7 @@ public class Controller {
         initCompareChart(selectedItem.getIntervals(), selectedItem.getPHeadings());
     }
 
-    //-----  Recursive function to add blink for expanded items  -----//
-    private void addBlink(TreeItem treeItem) {
-        new Timeline(
-                new KeyFrame(Duration.seconds(0),
-                        new KeyValue(((Node) treeItem.getValue()).opacityProperty(), 1.0)),
-                new KeyFrame(Duration.seconds(0.3),
-                        new KeyValue(((Node) treeItem.getValue()).opacityProperty(), 0.3, Interpolator.EASE_OUT)),
-                new KeyFrame(Duration.seconds(0.7),
-                        new KeyValue(((Node) treeItem.getValue()).opacityProperty(), 1.0, Interpolator.EASE_OUT))
-        ).play();
-        for (Object item : treeItem.getChildren()) {
-            addBlink((TreeItem) item);
-        }
-    }
+
 
     //------  Recursive function to get the root for statTreeView  ------//
     private TreeItem<IntervalPane> getRootWithChildren(Interval interval) throws IOException {
@@ -324,7 +321,14 @@ public class Controller {
         IntervalPane p = new IntervalPane(fxmlLoader.load(getClass().getResource("statTreeItem.fxml").openStream()));
         StatTreeItemController controller = fxmlLoader.getController();
         controller.init(interval.info.times.exec_time, interval.info.times.efficiency, interval.getType());
-        p.setStyle(interval.getGradient(lostTime));
+
+        String style = interval.getGradient(lostTime);
+        if (lostTimeGPU > 0 && (style.equals("")
+                || style.equals("-fx-background-color: linear-gradient(to right, transparent, transparent)"))) {
+            style = interval.getGradientGPU(lostTimeGPU);
+        }
+        p.setStyle(style);
+
         p.setInterval(interval);
         if (!interval.isVisible()) {
             p.setOpacity(0.5);
@@ -335,7 +339,7 @@ public class Controller {
                 treeItem.getChildren().add(getRootWithChildren(inter));
             }
         }
-        treeItem.expandedProperty().addListener((observable, oldValue, newValue) -> addBlink(treeItem));
+        treeItem.expandedProperty().addListener((observable, oldValue, newValue) -> Utils.addBlink(treeItem));
         treeItem.setExpanded(true);
         return treeItem;
     }
@@ -584,7 +588,7 @@ public class Controller {
     }
 
     private void setVisibleAnalysis(boolean visible) {
-        mainCharsVBox.setVisible(visible);
+        mainCharsScrollPane.setVisible(visible);
     }
 
     private void setVisibleProcAnalysis(boolean visible) {
@@ -601,78 +605,16 @@ public class Controller {
         initAnalysis(inter);
     }
 
-    // TODO: вынести в отдельный класс, наследующийся от TreeView
-    private void initAnalysis(Interval inter) {
-        if (inter == null) {
-            System.out.println("[WARN] null interval in initAnalysis");
-            return;
-        }
-
-        Paint effColor = Color.GREEN;
-        if (inter.info.times.efficiency <= 0.5)
-            effColor = Color.RED;
-        else if (inter.info.times.efficiency <= 0.8)
-            effColor = Color.ORANGE;
-
-        Paint lostColor = Color.RED;
-        if (inter.info.times.lost_time <= 0.2 * inter.info.times.sys_time)
-            lostColor = Color.GREEN;
-        else if (inter.info.times.lost_time <= 0.5 * inter.info.times.sys_time)
-            lostColor = Color.ORANGE;
-
-        CharacteristicPane<?>
-                efficiency = new CharacteristicPane<>("Коэффициент эффективности", inter.info.times.efficiency, effColor),
-                execTime = new CharacteristicPane<>("Время выполнения", inter.info.times.exec_time),
-                processors = new CharacteristicPane<>("Количество процессоров", inter.info.times.nproc),
-                threads = new CharacteristicPane<>("Общее количество нитей", inter.info.times.threadsOfAllProcs),
-                totalTime = new CharacteristicPane<>("Общее время", inter.info.times.sys_time),
-                prodTime = new CharacteristicPane<>("Полезное время", inter.info.times.prod_time),
-                lostTime = new CharacteristicPane<>("Потерянное время", inter.info.times.lost_time, lostColor),
-                insufParallelism = new CharacteristicPane<>("Неэффективный параллелизм", inter.info.times.insuf),
-                insufParallelismSys = new CharacteristicPane<>("Системный", inter.info.times.insuf_sys),
-                insufParallelismUser = new CharacteristicPane<>("Пользовательский", inter.info.times.insuf_user),
-                comm = new CharacteristicPane<>("Коммуникации", inter.info.times.comm),
-                idleTime = new CharacteristicPane<>("Простои", inter.info.times.idle),
-                loadImbalance = new CharacteristicPane<>("Неравномерность загрузки", inter.info.times.load_imb);
-
-        TreeItem<CharacteristicPane<?>>
-                efficiencyItem = new TreeItem<>(efficiency),
-                execTimeItem = new TreeItem<>(execTime),
-                processorsItem = new TreeItem<>(processors),
-                threadsItem = new TreeItem<>(threads),
-                totalTimeItem = new TreeItem<>(totalTime),
-                prodTimeItem = new TreeItem<>(prodTime),
-                loadImbalanceItem = new TreeItem<>(loadImbalance);
-
-        List<LabeledProgressBar> labelesPBs = Arrays.asList(
-        /* 0 */ new LabeledProgressBar(lostTime, inter.info.times.lost_time, inter.info.times.sys_time),
-        /* 1 */ new LabeledProgressBar(comm, inter.info.times.comm, inter.info.times.lost_time),
-        /* 2 */ new LabeledProgressBar(insufParallelism, inter.info.times.insuf, inter.info.times.lost_time),
-        /* 3 */ new LabeledProgressBar(insufParallelismSys, inter.info.times.insuf_sys, inter.info.times.insuf),
-        /* 4 */ new LabeledProgressBar(insufParallelismUser, inter.info.times.insuf_user, inter.info.times.insuf),
-        /* 5 */ new LabeledProgressBar(idleTime, inter.info.times.idle, inter.info.times.lost_time)
-        );
-
-        List<TreeItem> treeItems = labelesPBs.stream().map(TreeItem::new).collect(Collectors.toList());
-
-        treeItems.get(2).getChildren().addAll(treeItems.get(3), treeItems.get(4));
-        treeItems.get(0).getChildren().addAll(treeItems.get(2), treeItems.get(1), treeItems.get(5));
-
-        statAnalysisView.getRoot().getChildren().clear();
-        statAnalysisView.getRoot().getChildren().addAll(efficiencyItem, execTimeItem, processorsItem,
-                threadsItem, totalTimeItem, prodTimeItem, treeItems.get(0), loadImbalanceItem);
-
-        treeItems.get(2).expandedProperty().addListener((observable, oldValue, newValue) -> addBlink(treeItems.get(2)));
-        treeItems.get(0).expandedProperty().addListener((observable, oldValue, newValue) -> addBlink(treeItems.get(0)));
-
-        if (inter.info.times.lost_time > significantLostTimeCoef * inter.info.times.sys_time)
-            treeItems.get(0).setExpanded(true);
+    public void initAnalysis(Interval inter) {
+        statAnalysisView.initAnalysisCPU(inter);
+        statAnalysisGPUView.initAnalysisGPU(inter);
     }
 
     //-----  Analysis END  -----//
 
     public void initStatTree(Interval rootInterval, boolean updateFullRoot) {
         lostTime = rootInterval.info.times.lost_time;
+        lostTimeGPU = rootInterval.info.times.gpu_time_lost;
         TreeItem<IntervalPane> root;
 
         try {
@@ -761,7 +703,7 @@ public class Controller {
             List<Interval> subIntervals = intervals.stream().map(elt -> elt.intervals.get(finalI)).collect(Collectors.toList());
             treeItem.getChildren().add(getRootWithChildren(subIntervals, pHeadings));
         }
-        treeItem.expandedProperty().addListener((observable, oldValue, newValue) -> addBlink(treeItem));
+        treeItem.expandedProperty().addListener((observable, oldValue, newValue) -> Utils.addBlink(treeItem));
         treeItem.setExpanded(true);
         return treeItem;
     }
