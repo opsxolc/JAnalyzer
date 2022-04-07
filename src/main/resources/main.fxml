@@ -27,7 +27,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
 
-<TabPane fx:id="tabPane" prefHeight="559.0" prefWidth="694.0" stylesheets="@bootstrap3.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
+<TabPane fx:id="tabPane" prefHeight="559.0" prefWidth="694.0" stylesheets="@bootstrap3.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="analyzer.Controller">
 <tabs>
     <Tab fx:id="loadStatsTab" closable="false" text="Загрузка">
         <AnchorPane>

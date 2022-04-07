@@ -894,7 +894,7 @@ VBox > .split-menu-button.last > .arrow-button {
     -fx-background-color: #927cbf;
 }
 
-/*common things*/
+/*analyzer.common things*/
 .check-box:hover > .box,
 .check-box:selected > .box,
 .radio-button:hover > .radio,
