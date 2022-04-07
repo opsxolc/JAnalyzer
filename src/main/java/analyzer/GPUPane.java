@@ -1,5 +1,6 @@
 package analyzer;
 
+import analyzer.stat.DVMHStatMetrics;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -15,38 +16,6 @@ import analyzer.json.GPUTimesJson;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-
-//---  Названия метрик для отображения ГПУ  ---//
-enum DVMHStatMetrics{
-    DVMH_STAT_METRIC_KERNEL_EXEC,
-    /* DVMH-CUDA memcpy */
-    DVMH_STAT_METRIC_CPY_DTOH,
-    DVMH_STAT_METRIC_CPY_HTOD,
-    DVMH_STAT_METRIC_CPY_DTOD,
-    /* DVMH memcpy */
-    DVMH_STAT_METRIC_CPY_SHADOW_DTOH,
-    DVMH_STAT_METRIC_CPY_SHADOW_HTOD,
-    DVMH_STAT_METRIC_CPY_SHADOW_DTOD,
-    DVMH_STAT_METRIC_CPY_REMOTE_DTOH,
-    DVMH_STAT_METRIC_CPY_REMOTE_HTOD,
-    DVMH_STAT_METRIC_CPY_REMOTE_DTOD,
-    DVMH_STAT_METRIC_CPY_REDIST_DTOH,
-    DVMH_STAT_METRIC_CPY_REDIST_HTOD,
-    DVMH_STAT_METRIC_CPY_REDIST_DTOD,
-    DVMH_STAT_METRIC_CPY_IN_REG_DTOH,
-    DVMH_STAT_METRIC_CPY_IN_REG_HTOD,
-    DVMH_STAT_METRIC_CPY_IN_REG_DTOD,
-    DVMH_STAT_METRIC_CPY_GET_ACTUAL,
-    /* DVMH loop events */
-    DVMH_STAT_METRIC_LOOP_PORTION_TIME,
-    /* DVMH utility functions events */
-    DVMH_STAT_METRIC_UTIL_ARRAY_TRANSFORMATION,
-    DVMH_STAT_METRIC_UTIL_ARRAY_REDUCTION,
-    DVMH_STAT_METRIC_UTIL_RTC_COMPILATION,
-    DVMH_STAT_METRIC_UTIL_PAGE_LOCK_HOST_MEM,
-    // --
-    DVMH_STAT_METRIC_FORCE_INT
-};
 
 public class GPUPane extends VBox {
     private final Label titleLabel = new Label();

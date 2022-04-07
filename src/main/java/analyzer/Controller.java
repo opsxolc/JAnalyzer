@@ -681,7 +681,7 @@ public class Controller {
         FXMLLoader fxmlLoader = new FXMLLoader();
         IntervalComparePane p;
         try {
-             p = new IntervalComparePane(fxmlLoader.load(getClass().getResource("statCompareTreeItem.fxml").openStream()));
+             p = new IntervalComparePane(fxmlLoader.load(getClass().getResource("analyzer/statCompareTreeItem.fxml").openStream()));
         } catch (Exception e) {
             System.out.println("Error loading statCompareTreeItem.fxml\n" + e.toString());
             return null;

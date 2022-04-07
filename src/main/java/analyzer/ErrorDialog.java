@@ -13,10 +13,11 @@ public class ErrorDialog {
     private Stage stage;
 
     public ErrorDialog(String message){
-        FXMLLoader fxmlLoader = new FXMLLoader();
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("errorForm.fxml"));
+
         Pane p;
         try {
-            p = fxmlLoader.load(getClass().getResource("errorForm.fxml").openStream());
+            p = fxmlLoader.load();
         } catch (Exception e){
             System.out.println("Error opening analyzer.ErrorDialog: " + e);
             return;
@@ -25,9 +26,9 @@ public class ErrorDialog {
         errorController.setMessage(message);
         Scene scene = new Scene(p);
         stage = new Stage();
-        scene.getStylesheets().add("bootstrap3.css");
+        scene.getStylesheets().add("analyzer/bootstrap3.css");
         stage.setScene(scene);
-        stage.getIcons().add(new Image("/warr.png"));
+        stage.getIcons().add(new Image("analyzer/warr.png"));
         stage.setTitle("Ошибка");
         stage.initModality(Modality.APPLICATION_MODAL);
     }

@@ -18,7 +18,7 @@ import java.nio.file.Paths;
 public class Main extends Application {
 
     private static Socket clientSocket;
-    private static String version = "1.0";
+    private static final String version = "1.0";
 
     public static ObjectInputStream ois;
     public static ObjectOutputStream oos;
@@ -39,9 +39,9 @@ public class Main extends Application {
         Parent p = loader.load();
         primaryStage.setTitle("Анализатор статистик");
         Scene scene = new Scene(p, 700, 600);
-        scene.getStylesheets().add("series.css");
-        scene.getStylesheets().add("bootstrap3.css");
-        scene.getStylesheets().add("progressBar.css");
+        scene.getStylesheets().add("analyzer/series.css");
+        scene.getStylesheets().add("analyzer/bootstrap3.css");
+        scene.getStylesheets().add("analyzer/progressBar.css");
         primaryStage.setScene(scene);
 //        primaryStage.getIcons().add(new Image("/icon.png"));
         ((Controller)loader.getController()).initController(primaryStage);

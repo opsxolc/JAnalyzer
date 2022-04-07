@@ -1,6 +1,7 @@
 package analyzer.json;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 public class ProcTimesJson {
     public double prod_cpu;
@@ -26,4 +27,18 @@ public class ProcTimesJson {
     public long num_gpu;
     public List<ThTimesJson> th_times;
     public List<GPUTimesJson> gpu_times;
+
+    // additional GPU accumulated metrics
+    public double gpu_lost_time;
+    public double gpu_prod_time;
+
+    public void calculateAdditionalMetrics() {
+        try {
+            gpu_lost_time = gpu_times.stream().mapToDouble(x -> x.lost_time).reduce(Double::sum).getAsDouble();
+            gpu_prod_time = gpu_times.stream().mapToDouble(x -> x.prod_time).reduce(Double::sum).getAsDouble();
+        } catch (NoSuchElementException e) {
+            System.out.println("It's ok");
+        }
+    }
+
 }
