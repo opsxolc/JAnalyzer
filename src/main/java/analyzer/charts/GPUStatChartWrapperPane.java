@@ -1,12 +1,15 @@
 package analyzer.charts;
 
 import analyzer.stat.Interval;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 
-public class GPUStatChartWrapperPane extends Pane {
+public class GPUStatChartWrapperPane extends BorderPane {
     GPUStatChart gpuStatChart;
     AnchorPane anchorPane;
+    ToggleButton copyButton;
 
     public GPUStatChartWrapperPane() {
         super();
@@ -16,15 +19,16 @@ public class GPUStatChartWrapperPane extends Pane {
         AnchorPane.setRightAnchor(this, .0);
 
         anchorPane = new AnchorPane();
+        anchorPane.setMinSize(AnchorPane.USE_PREF_SIZE, AnchorPane.USE_PREF_SIZE);
         anchorPane.setPrefSize(AnchorPane.USE_COMPUTED_SIZE, AnchorPane.USE_COMPUTED_SIZE);
-        getChildren().add(anchorPane);
+        anchorPane.setMaxSize(AnchorPane.USE_COMPUTED_SIZE, AnchorPane.USE_COMPUTED_SIZE);
+        setCenter(anchorPane);
 
         gpuStatChart = new GPUStatChart();
         anchorPane.getChildren().add(gpuStatChart);
-        AnchorPane.setTopAnchor(gpuStatChart, .0);
-        AnchorPane.setBottomAnchor(gpuStatChart, .0);
-        AnchorPane.setLeftAnchor(gpuStatChart, .0);
-        AnchorPane.setRightAnchor(gpuStatChart, .0);
+
+        copyButton = new ToggleButton("Копирование");
+
     }
 
     public void displayData(Interval interval) {

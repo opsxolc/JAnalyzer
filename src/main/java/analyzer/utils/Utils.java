@@ -23,4 +23,14 @@ public class Utils {
             addBlink((TreeItem<?>) item);
         }
     }
+
+    public static double sumPositiveDoubles(double... values) {
+        double sum = 0;
+
+        for (double val : values) {
+            sum += val > 0 ? val : 0;
+        }
+
+        return sum;
+    }
 }

@@ -1,6 +1,7 @@
 package analyzer;
 
 import analyzer.characteristics.CharacteristicsTreeView;
+import analyzer.charts.GPUStatChartWrapperPane;
 import analyzer.charts.ProcStatChart;
 import analyzer.stat.Interval;
 import analyzer.stat.Stat;
@@ -41,6 +42,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.lang.System.exit;
+import static java.lang.System.in;
 
 public class Controller {
 
@@ -77,6 +79,7 @@ public class Controller {
 
     @FXML private AnchorPane statChartAnchorPane;
     private ProcStatChart procStatChart;
+    private GPUStatChartWrapperPane gpuStatChartWrapperPane;
     ChooseProcButton chooseProcButton;
     Interval fullRootInterval;
 
@@ -153,7 +156,7 @@ public class Controller {
 
         try {
             initChooseProcButton();
-            initStatChart();
+            initStatCharts();
             initFilters();
             initStatTable();
             resetLoadedStat();
@@ -230,13 +233,14 @@ public class Controller {
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
     }
 
-    private void initStatChart() {
+    private void initStatCharts() {
         procStatChart = new ProcStatChart(this::resetProc, this::selectProc);
         statChartAnchorPane.getChildren().add(procStatChart);
-        AnchorPane.setTopAnchor(procStatChart, 0.);
-        AnchorPane.setBottomAnchor(procStatChart, 0.);
-        AnchorPane.setLeftAnchor(procStatChart, 0.);
-        AnchorPane.setRightAnchor(procStatChart, 0.);
+        procStatChart.setVisible(false);
+
+        gpuStatChartWrapperPane = new GPUStatChartWrapperPane();
+        statChartAnchorPane.getChildren().add(gpuStatChartWrapperPane);
+        gpuStatChartWrapperPane.setVisible(false);
     }
 
     private void initSortMenu() {
@@ -463,7 +467,17 @@ public class Controller {
 
     //-----  Updates stacked bar chart for selected analyzer.interval  -----//
     private void updateStatChart(Interval interval) {
+        if (interval.info.times.efficiency >= 0.95 && interval.info.times.gpu_num > 0) {
+            gpuStatChartWrapperPane.displayData(interval);
+            gpuStatChartWrapperPane.setVisible(true);
+            procStatChart.setVisible(false);
+
+            return;
+        }
+
         procStatChart.displayLostTime(interval);
+        procStatChart.setVisible(true);
+        gpuStatChartWrapperPane.setVisible(false);
     }
 
     //-----  Initializes compare chart based on active mode  -----//

@@ -6,6 +6,7 @@ import analyzer.json.ProcTimesJson;
 import javafx.scene.Node;
 import javafx.scene.chart.*;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 
@@ -28,6 +29,10 @@ public class ProcStatChart extends StackedBarChart {
         this.selectProc = selectProc;
         setTitle("Потерянное время");
         setAnimated(false);
+        AnchorPane.setTopAnchor(this, .0);
+        AnchorPane.setBottomAnchor(this, .0);
+        AnchorPane.setLeftAnchor(this, .0);
+        AnchorPane.setRightAnchor(this, .0);
     }
 
     //-----  Displays Labels for Data in Chart  -----//

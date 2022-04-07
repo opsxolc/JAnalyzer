@@ -4,7 +4,9 @@ import analyzer.json.GPUTimesJson;
 import analyzer.json.ProcTimesJson;
 import analyzer.stat.DVMHStatMetrics;
 import analyzer.stat.Interval;
+import analyzer.utils.Utils;
 import javafx.scene.chart.*;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 
@@ -16,10 +18,15 @@ public class GPUStatChart extends LineChart {
 //    Consumer<Integer> selectProc;
 
     public GPUStatChart() {
-        super(new CategoryAxis(), new NumberAxis());
+        super(new NumberAxis(), new NumberAxis());
 //        this.resetProc = resetProc;
 //        this.selectProc = selectProc;
         setTitle("Характеристики работы на GPU");
+        AnchorPane.setTopAnchor(this, .0);
+        AnchorPane.setBottomAnchor(this, .0);
+        AnchorPane.setLeftAnchor(this, .0);
+        AnchorPane.setRightAnchor(this, .0);
+        setAnimated(false);
     }
 
     //-----  Displays Labels for Data in Chart  -----//
@@ -35,12 +42,14 @@ public class GPUStatChart extends LineChart {
     public void displayData(Interval interval) {
         XYChart.Series<Integer, Double> prod = new XYChart.Series<>();
         XYChart.Series<Integer, Double> lost = new XYChart.Series<>();
-        XYChart.Series<Integer, Double> copy = new XYChart.Series<>();
+        XYChart.Series<Integer, Double> copyLost = new XYChart.Series<>();
+        XYChart.Series<Integer, Double> copyProd = new XYChart.Series<>();
         XYChart.Series<Integer, Double> cycles = new XYChart.Series<>();
 
         prod.setName("Полезное время");
         lost.setName("Потерянное время");
-        copy.setName("Копирование");
+        copyLost.setName("Потеряно на копировании");
+        copyProd.setName("Полезное копирование");
         cycles.setName("Выполнение циклов");
         int i = 0;
         for (ProcTimesJson procTimes : interval.info.proc_times) {
@@ -49,36 +58,68 @@ public class GPUStatChart extends LineChart {
             for (GPUTimesJson gpuTimes : procTimes.gpu_times) {
                 prod.getData().add(new Data<>(i, gpuTimes.prod_time));
                 lost.getData().add(new Data<>(i, gpuTimes.lost_time));
-                copy.getData().add(new Data<>(i,
-                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_DTOD.ordinal()).sum +
-                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_DTOH.ordinal()).sum +
-                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_HTOD.ordinal()).sum +
 
-                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_SHADOW_DTOD.ordinal()).sum +
-                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_SHADOW_DTOH.ordinal()).sum +
-                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_SHADOW_HTOD.ordinal()).sum +
+                copyLost.getData().add(new Data<>(i,
+                        Utils.sumPositiveDoubles(
+                                gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_DTOD.ordinal()).timeLost,
+                                gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_DTOH.ordinal()).timeLost,
+                                gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_HTOD.ordinal()).timeLost,
 
-                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_IN_REG_DTOD.ordinal()).sum +
-                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_IN_REG_DTOH.ordinal()).sum +
-                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_IN_REG_HTOD.ordinal()).sum +
+                                gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_SHADOW_DTOD.ordinal()).timeLost,
+                                gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_SHADOW_DTOH.ordinal()).timeLost,
+                                gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_SHADOW_HTOD.ordinal()).timeLost,
 
-                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_REDIST_DTOD.ordinal()).sum +
-                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_REDIST_DTOH.ordinal()).sum +
-                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_REDIST_HTOD.ordinal()).sum +
+                                gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_IN_REG_DTOD.ordinal()).timeLost,
+                                gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_IN_REG_DTOH.ordinal()).timeLost,
+                                gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_IN_REG_HTOD.ordinal()).timeLost,
 
-                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_REMOTE_DTOD.ordinal()).sum +
-                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_REMOTE_DTOH.ordinal()).sum +
-                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_REMOTE_HTOD.ordinal()).sum +
+                                gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_REDIST_DTOD.ordinal()).timeLost,
+                                gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_REDIST_DTOH.ordinal()).timeLost,
+                                gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_REDIST_HTOD.ordinal()).timeLost,
 
-                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_GET_ACTUAL.ordinal()).sum
+                                gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_REMOTE_DTOD.ordinal()).timeLost,
+                                gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_REMOTE_DTOH.ordinal()).timeLost,
+                                gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_REMOTE_HTOD.ordinal()).timeLost,
+
+                                gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_GET_ACTUAL.ordinal()).timeLost
+                        )
+                ));
+
+                copyProd.getData().add(new Data<>(i,
+                    Utils.sumPositiveDoubles(
+                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_DTOD.ordinal()).timeProductive,
+                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_DTOH.ordinal()).timeProductive,
+                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_HTOD.ordinal()).timeProductive,
+
+                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_SHADOW_DTOD.ordinal()).timeProductive,
+                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_SHADOW_DTOH.ordinal()).timeProductive,
+                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_SHADOW_HTOD.ordinal()).timeProductive,
+
+                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_IN_REG_DTOD.ordinal()).timeProductive,
+                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_IN_REG_DTOH.ordinal()).timeProductive,
+                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_IN_REG_HTOD.ordinal()).timeProductive,
+
+                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_REDIST_DTOD.ordinal()).timeProductive,
+                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_REDIST_DTOH.ordinal()).timeProductive,
+                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_REDIST_HTOD.ordinal()).timeProductive,
+
+                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_REMOTE_DTOD.ordinal()).timeProductive,
+                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_REMOTE_DTOH.ordinal()).timeProductive,
+                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_REMOTE_HTOD.ordinal()).timeProductive,
+
+                        gpuTimes.metrics.get(DVMHStatMetrics.DVMH_STAT_METRIC_CPY_GET_ACTUAL.ordinal()).timeProductive
+                    )
                 ));
 
                 cycles.getData().add(new Data<>(i, gpuTimes.metrics.get(
-                        DVMHStatMetrics.DVMH_STAT_METRIC_LOOP_PORTION_TIME.ordinal()).sum
+                        DVMHStatMetrics.DVMH_STAT_METRIC_LOOP_PORTION_TIME.ordinal()).timeProductive
                 ));
 
                 ++i;
             }
+
+            getData().clear();
+            getData().addAll(lost, copyLost, prod, copyProd, cycles);
         }
     }
 
