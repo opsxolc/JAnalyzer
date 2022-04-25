@@ -692,10 +692,10 @@ public class Controller {
 
     private TreeItem<IntervalComparePane> getRootWithChildren(List<Interval> intervals,
                                                               List<String> pHeadings) {
-        FXMLLoader fxmlLoader = new FXMLLoader();
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("statCompareTreeItem.fxml"));
         IntervalComparePane p;
         try {
-             p = new IntervalComparePane(fxmlLoader.load(getClass().getResource("analyzer/statCompareTreeItem.fxml").openStream()));
+             p = new IntervalComparePane(fxmlLoader.load());
         } catch (Exception e) {
             System.out.println("Error loading statCompareTreeItem.fxml\n" + e.toString());
             return null;
