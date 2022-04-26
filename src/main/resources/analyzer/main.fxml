@@ -139,7 +139,7 @@
                     </AnchorPane>
                 </items>
             </SplitPane>
-            <Label fx:id="statLabel" layoutX="14.0" layoutY="14.0" prefHeight="17.0" prefWidth="236.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="444.0" AnchorPane.topAnchor="14.0" />
+            <Label fx:id="statLabel" layoutX="14.0" layoutY="14.0" prefHeight="17.0" prefWidth="217.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="463.0" AnchorPane.topAnchor="14.0" />
             <Button fx:id="resetStatButton" layoutX="562.0" layoutY="8.0" mnemonicParsing="false" onAction="#resetLoadedStat" prefHeight="4.0" prefWidth="79.0" text="Сброс" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="8.0" />
             <ToggleButton fx:id="procAnalysisButton" layoutX="440.0" layoutY="9.0" mnemonicParsing="false" onAction="#procAnalysis" text="Попроцессорно" AnchorPane.rightAnchor="102.5" AnchorPane.topAnchor="8.0" />
             <MenuButton fx:id="filterMenuButton" layoutX="350.0" layoutY="8.0" mnemonicParsing="false" text="Фильтр" AnchorPane.rightAnchor="224.0" AnchorPane.topAnchor="8.0">
@@ -149,6 +149,7 @@
                   <MenuItem mnemonicParsing="false" onAction="#resetFilters" text="Сброс" />
               </items>
             </MenuButton>
+            <ToggleButton fx:id="autoAnalysisButton" layoutX="123.0" layoutY="8.0" mnemonicParsing="false" onAction="#autoAnalysis" text="Автоанализ" AnchorPane.rightAnchor="483.5" AnchorPane.topAnchor="8.0" />
         </AnchorPane>
     </Tab>
     <Tab fx:id="compareStatsTab" closable="false" text="Сравнение">

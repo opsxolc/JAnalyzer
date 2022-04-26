@@ -1,5 +1,6 @@
 package analyzer;
 
+import analyzer.autoanalysis.AutoAnalysis;
 import analyzer.characteristics.CharacteristicsTreeView;
 import analyzer.charts.GPUStatChartWrapperPane;
 import analyzer.charts.ProcStatChart;
@@ -42,7 +43,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.lang.System.exit;
-import static java.lang.System.in;
 
 public class Controller {
 
@@ -68,7 +68,11 @@ public class Controller {
     @FXML private VBox GPUVBox;
     @FXML private SplitPane GPUSplitPane;
     @FXML private ScrollPane GPUScrollPane;
+
     @FXML private ToggleButton procAnalysisButton;
+    @FXML private ToggleButton autoAnalysisButton;
+
+    @FXML private final AutoAnalysis autoAnalysis = new AutoAnalysis();
 
     @FXML private ScrollPane mainCharsScrollPane;
     @FXML private VBox mainCharsVBox;
@@ -117,20 +121,12 @@ public class Controller {
         GPU
     }
 
-    enum LostTimeType {
-        insufSys,
-        insufUser,
-        idle,
-        comm
-    }
-
     Pattern pData = Pattern.compile("data.");
     Pattern pDataPart = Pattern.compile("default-color.");
 
     private double lostTime = 0;
     private double lostTimeGPU = 0;
     private double lostCompareTime = 0;
-//    private double GPUCompareTime = 0;
     private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
     public CompareType curCompareType = CompareType.lostTime;
     public Integer curProc = -1;
@@ -165,6 +161,7 @@ public class Controller {
             initCompareTypeChoiceBox();
             initStatAnalysisViews();
             initFileChooser();
+            initAutoAnalysis();
         } catch (Exception e) {
             System.out.println("could not init main controller: " + e.toString());
             exit(1);
@@ -270,6 +267,14 @@ public class Controller {
             }
         }
         LoadStatList();
+    }
+
+    private void initAutoAnalysis() {
+        Tab autoAnalysisTab = new Tab("Автоанализ");
+        autoAnalysisTab.setDisable(false);
+        autoAnalysisTab.setClosable(false);
+        autoAnalysisTab.setContent(autoAnalysis.getMainPane());
+        tabPane.getTabs().add(2, autoAnalysisTab);
     }
 
     //-----  INIT SECTION END  -----//
@@ -587,6 +592,13 @@ public class Controller {
     //-----  Analysis  -----//
 
     @FXML
+    public void autoAnalysis() {
+        // TODO: выбор интервала, мб брать текущий
+        autoAnalysis.Analyze(getMainInterval());
+        tabPane.getSelectionModel().select(2);
+    }
+
+    @FXML
     public void procAnalysis() {
         if (procAnalysisButton.isSelected()) {
             enableProcAnalysis();
@@ -748,6 +760,10 @@ public class Controller {
         statCompareTreeView.getSelectionModel().select(0);
         //-----  Init all analyzer.charts to set max Y values  -----//
         initAllCompareCharts(intervals, p_headings);
+    }
+
+    public Interval getMainInterval(){
+        return statTreeView.getRoot().getValue().getInterval();
     }
 
     //-----  Get current selected analyzer.stat.Interval for loaded analyzer.stat.Stat  -----//

@@ -4,6 +4,7 @@ import analyzer.json.IntervalJson;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.IntPredicate;
 import java.util.stream.Collectors;
 
@@ -12,6 +13,8 @@ public class Interval implements Cloneable {
     public IntervalJson info = new IntervalJson();
     public String text = "";
     public boolean visible = true;
+
+    public String id = UUID.randomUUID().toString();
 
     public static final int SEQ = 21, PAR = 22, USER = 23;
 
@@ -60,6 +63,7 @@ public class Interval implements Cloneable {
         }
         res.info = info;
         res.text = text;
+        res.id = id;
         res.intervals = intervals.stream().map(Interval::clone).collect(Collectors.toList());
         return res;
     }
