@@ -5,18 +5,18 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TreeItem;
 import javafx.scene.layout.AnchorPane;
 
-public class InsufTreeItem extends TreeItem<Node> {
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
-    public InsufTreeItem(double timeSeq, double timePar) {
-        super();
+public class InsufTreeItem extends AutoAnalysisTreeItem {
 
-        setValue(new Label("Неэффективный параллелизм"));
+    public InsufTreeItem(double timeSeq, double timePar, double percentLost) {
+        super("Неэффективный параллелизм", percentLost);
+
         double percent = timeSeq / (timeSeq + timePar) * 100;
 
         getChildren().add(new TreeItem<>(getPercentBar(percent)));
         getChildren().add(new TreeItem<>(getSolutionLabel(percent)));
-
-        setExpanded(true);
     }
 
     private AnchorPane getPercentBar(double percent) {

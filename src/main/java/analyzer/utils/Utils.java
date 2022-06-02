@@ -9,6 +9,7 @@ import javafx.scene.control.TreeItem;
 import javafx.util.Duration;
 
 public class Utils {
+
     //-----  Recursive function to add blink for expanded items  -----//
     public static void addBlink(TreeItem<?> treeItem) {
         new Timeline(
@@ -33,4 +34,5 @@ public class Utils {
 
         return sum;
     }
+
 }

@@ -11,13 +11,11 @@ public class Filter extends CheckMenuItem {
 
     public static Predicate<Interval> truePredicate = t -> true;
     private Predicate<Interval> curFilter = truePredicate;
-    private final Controller controller;
 
 
     public Filter(Controller controller, String name, Supplier<Predicate<Interval>> supplier) {
         super();
         setText(name);
-        this.controller = controller;
 
         setOnAction(e -> {
             curFilter = (isSelected()) ? supplier.get() : truePredicate;

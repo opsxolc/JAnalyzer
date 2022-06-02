@@ -3,7 +3,6 @@ package analyzer.autoanalysis;
 import analyzer.stat.Interval;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.control.TreeView;
 import javafx.scene.layout.AnchorPane;
 
 import java.util.ArrayList;
@@ -12,6 +11,11 @@ public class AutoAnalysis {
 
     AnchorPane mainPane;
     AutoAnalysisController controller;
+
+    protected static boolean valuesAreClose(double x, double y) {
+        return Math.abs(x - y)
+                <= 0.2 * Math.max(x, y);
+    }
 
     public Node getMainPane() {
         return mainPane.getChildren().get(0);
@@ -31,13 +35,9 @@ public class AutoAnalysis {
     }
 
     private ArrayList<String> analyzeInsufPar(
-            Interval interval, Double[] times
+            Interval interval, Double[] times, Double max
     ) {
         ArrayList<String> ids = new ArrayList<>();
-
-        // TODO: мб убрать проверку
-        if (!interval.isVisible())
-            return ids;
 
         if (!interval.hasChildLoopInterval()) {
             switch (interval.info.id.t) {
@@ -49,12 +49,12 @@ public class AutoAnalysis {
                     break;
             }
 
-            if (interval.info.times.insuf >= 0.5 * interval.info.times.lost_time)
+            if (interval.info.times.insuf >= 0.2 * max)
                 ids.add(interval.id);
         }
 
         for (Interval inter : interval.intervals)
-            ids.addAll(analyzeInsufPar(inter, times));
+            ids.addAll(analyzeInsufPar(inter, times, max));
 
         return ids;
     }
@@ -65,8 +65,15 @@ public class AutoAnalysis {
 
         // Неэффективный параллелизм
         Double[] times = {0., 0.};
-        ArrayList<String> insufIntervals = analyzeInsufPar(interval, times);
-        controller.addResult(new InsufTreeItem(times[0], times[1]));
+        // TODO: добавить времена посл и пар
+        ArrayList<String> insufIntervals = analyzeInsufPar(interval, times, interval.info.times.insuf);
+        controller.addResult(new InsufTreeItem(times[0], times[1],
+                (interval.info.times.lost_time > 0) ? interval.info.times.insuf / interval.info.times.lost_time * 100: 0 ));
+
+        // Коммуникации
+        controller.addResult(new CommTreeItem(interval.info.times.comm, interval.info.times.synch,
+                interval.info.times.load_imb, interval.info.times.time_var,
+                (interval.info.times.lost_time > 0) ? interval.info.times.comm / interval.info.times.lost_time * 100 : 0));
 
         System.out.println(times[0] + " " + times[1]);
         System.out.println(insufIntervals);

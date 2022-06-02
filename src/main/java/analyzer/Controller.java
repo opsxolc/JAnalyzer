@@ -70,7 +70,7 @@ public class Controller {
     @FXML private ScrollPane GPUScrollPane;
 
     @FXML private ToggleButton procAnalysisButton;
-    @FXML private ToggleButton autoAnalysisButton;
+    @FXML private Button autoAnalysisButton;
 
     @FXML private final AutoAnalysis autoAnalysis = new AutoAnalysis();
 
@@ -454,7 +454,7 @@ public class Controller {
         // TODO: show current proc filter
     }
 
-    private void resetSelectProcs(){
+    private void resetSelectProcs() {
         if (fullRootInterval == null)
             return;
 

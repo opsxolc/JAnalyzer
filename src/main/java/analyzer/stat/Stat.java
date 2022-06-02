@@ -25,7 +25,7 @@ public class Stat implements Cloneable, Comparable<Stat>{
     public String dir;
 
     public Stat(){}
-
+ 
     public int compareTo(@NotNull Stat compareStat) {
         return 1;
     }
@@ -70,7 +70,7 @@ public class Stat implements Cloneable, Comparable<Stat>{
         interval = new Interval(info.inter, dir, false);
     }
 
-    public static void cutIntervals(List<List<Interval>> statsIntervals){
+    private static void cutIntervals(List<List<Interval>> statsIntervals){
         List<Interval> intervals = statsIntervals.get(0);
         ArrayList<Interval> remInters = new ArrayList<>();
         for (Interval inter : intervals) {
@@ -103,7 +103,7 @@ public class Stat implements Cloneable, Comparable<Stat>{
 
     // функция подрезает дерево statIntervals под структуру дерева intervals
     // intervals - образец, statInters - обрезаемое дерево
-    public static void rmRedIntervals(List<Interval> intervals, List<Interval> statIntervals){
+    private static void rmRedIntervals(List<Interval> intervals, List<Interval> statIntervals){
         ArrayList<Interval> remInters = new ArrayList<>();
         if (intervals.size() == 0) {
             statIntervals.clear();
